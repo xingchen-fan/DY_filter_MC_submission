@@ -2,7 +2,7 @@
 
 This repository is merely for job submissions of Run3 filter MC sample generation. Run2 job submission scripts are stored in `Run2` for testing and reference.
 Filters and CMSSW are set up already in our CERN box at `/eos/project/h/htozg-dy-privatemc/`. 
-Different eras should use different CMSSW.
+Different eras should use different CMSSW and environments on lxplus.
 
 ## Guidance for the number of jobs
 
@@ -23,7 +23,7 @@ For Run3, assuming jet photon events makes up 55% of total DY after baseline
 |2023BPix|10000|50000|
 |2024|141000|707000|
 
-## CRAB Job Guide (No-brainer Version)
+## CRAB Job Guide
 
 **IMPORTANT:** You need to have your grid certificate installed, please go to this [page](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookStartingGrid) and follow the steps. 
 
@@ -32,14 +32,10 @@ Take a 2017 submission as an example:
 1. Login to LXPLUS
 2. git clone this repo.
 3. Run `cmssw-el7`
-4. `cd` to the prepared CMSSW dir in our CERNBOX
-   ```
-   cd /eos/project/h/htozg-dy-privatemc/CMSSW_10_6_40/src/
-   ```
-   and run `cmsenv; scram b`
+4. `cd` to the prepared CMSSW dir in our CERNBOX and run `cmsenv`
 5. Initialize grid certificate `voms-proxy-init --voms cms`
 6. Create your own folder in our CERNBOX. Then create one folder per submission in your folder, i.e. `YOURDIR/2017`.
-7. Back to the `CRAB_script/` of your local repo dir and run `submitter.sh`:
+7. Back to the `DY_filter_MC_submission/` of your local repo dir and run `submitter.sh`:
    ```
    ./submitter.sh crabConfig2017.py n DY2017 YOURDIR/2017 MYTAG
    ```
@@ -69,6 +65,6 @@ crab resubmit -d crab_projects/crab_DY2017_1
 which is to resubmit failed jobs in a submission.
 
 
-As I list in the table previously, we need 7 submissions (10k jobs each) to have one fold of 2017 DY statistics. Likewise, 3 submissions for 2016, 4 submissions for 2016APV and 7 submssions for 2018. DO NOT submit all these jobs together and you will lose your priority! Finish one year at a time and move on to the next year. 
+As I list in the table previously, we need 7 submissions (10k jobs each) to have one fold of 2017 DY statistics. Likewise, 3 submissions for 2016, 4 submissions for 2016APV and 7 submissions for 2018. DO NOT submit all these jobs together and you will lose your priority! Finish one year at a time and move on to the next year. 
 
 If you finish all the years, congratulations! You help us increase the statistics by 1 fold! And you can create a sub
