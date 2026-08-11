@@ -26,7 +26,6 @@ For Run3, assuming jet photon events makes up 55% of total DY after baseline
 ## CRAB Job Guide
 
 **IMPORTANT:** You need to have your grid certificate installed, please go to this [page](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookStartingGrid) and follow the steps. 
-**NOTICE:** Another [repo](https://github.com/xingchen-fan/DY_stat_boost/tree/main) is created just for Run3 MC job submission. Please go there!
 
 Take a 2017 submission as an example:
 
