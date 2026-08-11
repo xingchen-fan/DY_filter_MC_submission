@@ -26,6 +26,7 @@ For Run3, assuming jet photon events makes up 55% of total DY after baseline
 ## CRAB Job Guide
 
 **IMPORTANT:** You need to have your grid certificate installed, please go to this [page](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookStartingGrid) and follow the steps. 
+**NOTICE:** Another [repo](https://github.com/xingchen-fan/DY_stat_boost/tree/main) is created just for Run3 MC job submission. Please go there!
 
 Take a 2017 submission as an example:
 
@@ -47,9 +48,9 @@ Take a 2017 submission as an example:
    * The tag at the end of the output root files. In each submission, a number will be added at the end of it so that the tags are different.
    
 
-Now, you successfully submit **n** submissions of jobs and there will eventually be about **n***9500 output files (5% failure rate) in `/YOURDIR/2017` if evenrything goes as intended.
+Now, you successfully submit **n** submissions of jobs and there will eventually be about **n***9500 output files (5% failure rate) in `/YOURDIR/2017` if everything goes as intended.
 
-Three usefull CRAB commands are
+Three useful CRAB commands are
 ```
 crab status -d crab_projects/crab_DY2017_1
 ```
