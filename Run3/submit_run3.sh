@@ -3,7 +3,7 @@
 #
 #   ./submit_run3.sh [--dest <xrootd-url>] <era> <n_tasks> <your_tag> [first_index]
 #
-#   era         2022postEE | 2023preBPix | 2023postBPix | 2024_2E | 2024_2Mu
+#   era         2022preEE | 2022postEE | 2023preBPix | 2023postBPix | 2024_2E | 2024_2Mu
 #   n_tasks     how many tasks; each is 10,000 jobs (CRAB's per-task limit)
 #   your_tag    goes into the request name and the output file names, so two
 #               people submitting the same era do not collide -- use your
@@ -81,9 +81,17 @@ case $ERA in
   *)        DIR=$ERA; FLAV=""  ;;
 esac
 
+# One generated config per task. They are throw-away -- kept only so a failed
+# submission can be inspected -- so they go in their own directory instead of
+# burying the six templates under a hundred generated files.
+# Paths INSIDE the config (psetName, scriptExe, inputFiles, workArea) are
+# resolved against the CWD of `crab submit`, not against the config's location,
+# so this move is safe as long as you submit from this directory.
+mkdir -p crab_configs
+
 for i in $(seq "$START" $((START + N - 1))); do
   T=${TAG}_${i}
-  WORK=crabConfig_${ERA}_${T}.py
+  WORK=crab_configs/crabConfig_${ERA}_${T}.py
   cp "$CFG" "$WORK"
 
   sed -i "s@\(config.General.requestName = \).*@\1'DY${ERA}_${T}'@" "$WORK"
