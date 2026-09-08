@@ -10,12 +10,12 @@ NEVENTS=${ARG#*=}
 NJOB=$1
 OUTTAG=${ARGTAG#*=}
 # Where the finished NanoAOD is written. $DIR is appended to OUT_BASE, so
-# DIR=<era> lands in .../pelai/HZg/root_DYmix/<era>. An optional 5th
+# DIR=<era> lands in .../pelai/HZg/root_DYfilter/phase1/<era>. An optional 5th
 # scriptArg DEST=<full xrootd URL> overrides the whole thing.
 # Fallback only: submit_run3.sh always passes DEST=. Your own subdirectory of
 # the shared project space, so a manual run never writes into somebody
 # else's area.
-OUT_BASE="root://eosuser.cern.ch//eos/project/h/htozg-dy-privatemc/${USER}/HZg/root_DYmix"
+OUT_BASE="root://eosuser.cern.ch//eos/project/h/htozg-dy-privatemc/${USER}/HZg/root_DYfilter/phase1"
 ARGDEST=$5
 DEST=${ARGDEST#*=}
 if [ -z "$DEST" ]

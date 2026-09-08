@@ -57,7 +57,7 @@ voms-proxy-info -exists -valid 1:00 >/dev/null 2>&1 || {
 PROJECT=root://eosuser.cern.ch//eos/project/h/htozg-dy-privatemc
 if [ -z "$DEST_BASE" ]; then
   U=${USER:?USER not set}
-  DEST_BASE="$PROJECT/${U}/HZg/root_DYmix"
+  DEST_BASE="$PROJECT/${U}/HZg/root_DYfilter/phase1"
 fi
 OUT_BASE=$DEST_BASE
 
