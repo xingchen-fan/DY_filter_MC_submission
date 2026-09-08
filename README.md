@@ -1,5 +1,14 @@
 # DY_filter_MC_submission
 
+Job submission for the DY filter MC production.
+
+* **Run 3 (current production) → [`Run3/`](Run3/README.md)** — start there.
+* `Run2/` — the original Run 2 scripts, kept for reference.
+
+The rest of this file is the original Run 2 guidance.
+
+---
+
 This repository is merely for job submissions of Run3 filter MC sample generation. Run2 job submission scripts are stored in `Run2` for testing and reference.
 Filters and CMSSW are set up already in our CERN box at `/eos/project/h/htozg-dy-privatemc/`. 
 Different eras should use different CMSSW and environments on lxplus.
