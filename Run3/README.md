@@ -1,12 +1,47 @@
 # Run 3 DY filter MC — job submission
 
 Private DY production with a GEN-level π⁰/η filter, so that only events that can
-enter the DY + fake photon selection are simulated (~9.7% pass, saving ~90% of
-the SIM/DIGI/RECO CPU). Full chain per job: LHE+GEN → SIM → DIGI+DATAMIX+HLT →
+enter the DY + fake photon selection are simulated, saving most of the
+SIM/DIGI/RECO CPU. Full chain per job: LHE+GEN → SIM → DIGI+DATAMIX+HLT →
 RECO → MINIAOD → NANOAOD → stage-out. Only the NanoAOD is kept.
 
 This directory is self-contained: the job script, the filter source, the
 fragments and the premix file lists all travel with the job.
+
+## What changed in the current round (from 2026-09-06)
+
+The sample definition changed, so output from before this date is a **different
+sample** and must not be mixed in. Two changes:
+
+**1. A tighter gen filter** (`gen_filter/MatchDYFilter.cc`) — the π⁰/η photon
+now also has to have cluster `pT > 10 GeV`, and the event has to have a gen Z
+in `75 < m_ll < 105 GeV`. Measured on a 10-job validation batch:
+
+| | old filter | new filter |
+|---|---|---|
+| 2022postEE | 976 events/job (9.76%) | 303 events/job (3.03%) |
+| 2024_2E | — | 145 events/job (1.45%) |
+
+so **3.22× more jobs** are needed for the same statistics in 2022postEE.
+
+**2. A second gen-particle keep rule** in the cmsDriver steps of `job/*.sh`:
+
+```python
+process.prunedGenParticles.select.append('keep status == 1 && pt > 0.5')
+#   ... and the same on process.finalGenParticles for the NANOAOD step
+```
+
+The first rule (`keep++ ... π⁰/η`) was already there. The new one keeps the
+hadrons, which is what lets the AN-22-027 photon-origin classification be
+reproduced **from NanoAOD** — the production deletes MiniAOD, so without it the
+classification cannot be redone on the output at all. Validated at 93.4%
+per-photon agreement against MiniAOD; see `scripts_plot/README.md`.
+
+It costs disk: 12.0 kB/event against 4.5 kB/event before, because status-1
+hadrons now dominate the `GenPart` record (π± alone is 44% of it).
+
+`tools/sync_keep_rules.py` is what put the rule into all six payloads — run it
+again if you add an era, rather than editing six files by hand.
 
 ## Do I need a particular CMSSW?
 
@@ -74,7 +109,7 @@ Example — 3 tasks (30,000 jobs) of 2022postEE:
 **Your own subdirectory of the shared project space**, derived from `$USER`:
 
 ```
-/eos/project/h/htozg-dy-privatemc/<user>/HZg/root_DYmix/<era>/<tag>/
+/eos/project/h/htozg-dy-privatemc/<user>/HZg/root_DYfilter/phase1/<era>/<tag>/
 ```
 
 Everybody contributes to the same project, but nobody ever writes inside
@@ -89,7 +124,7 @@ Use `--dest <xrootd-url>` to write somewhere else entirely, e.g. your own
 CERNBox:
 
 ```bash
-./submit_run3.sh --dest root://eosuser.cern.ch//eos/user/x/xxx/HZg/root_DYmix \
+./submit_run3.sh --dest root://eosuser.cern.ch//eos/user/x/xxx/HZg/root_DYfilter \
                  2022postEE 3 pz
 ```
 
@@ -100,6 +135,10 @@ written outside it has to be copied in before it counts.
 priority and slows everyone down.
 
 ## How many jobs
+
+⚠️ **The table below is for the OLD filter.** With the new one, multiply every
+job count by **3.22** (2022postEE measurement). The 2024 rows are worse still —
+its new-filter efficiency is 1.45%, so about 6.7× the old count.
 
 For Run 3, assuming jet photon events make up 55% of total DY after baseline,
 one fold of statistics needs:
@@ -125,8 +164,10 @@ instead of ~970.)
 queue costs everyone their grid priority.
 
 Current progress is tracked in `doc/HZgamma/extended_dy_job_log.md`, counted
-from the files actually on EOS — not from `crab status`, whose `finished`
-counter stays at zero here because the jobs stage out themselves.
+from the files actually on EOS. `crab status`'s `finished` agrees with that
+count (measured: 1481 finished, 1481 files), so either is fine — but a freshly
+submitted task can report 0 finished for a while even though files are already
+appearing, because the jobs stage out themselves rather than through CRAB.
 
 ## Monitor
 
@@ -137,7 +178,7 @@ crab kill     -d crab_projects/crab_DY2022postEE_pz_1
 ```
 
 Output goes to
-`/eos/project/h/htozg-dy-privatemc/pelai/HZg/root_DYmix/<era>/<tag>/`.
+`/eos/project/h/htozg-dy-privatemc/<user>/HZg/root_DYfilter/phase1/<era>/<tag>/`.
 Each task gets its own subdirectory — a single EOS directory starts failing to
 list past ~120k files, so do not flatten this.
 
@@ -153,15 +194,41 @@ truncation, not a result.
 
 ## What is in here
 
+Tracked — this is the production:
+
 | | |
 |---|---|
 | `submit_run3.sh` | writes one CRAB config per task and submits |
-| `crabConfig_<era>.py` | templates; `submit_run3.sh` rewrites name/tag/output |
+| `crabConfig_<era>.py` | the six templates; `submit_run3.sh` rewrites name/tag/output |
 | `job/<era>DY.sh` | the actual job: cmsDriver chain + stage-out |
 | `gen_filter/MatchDYFilter.cc` | the GEN filter, compiled on the worker node |
 | `gen_filter/*fragment.py` | generator fragments, one per era |
 | `premix_lists/` | premix pileup files known to be on disk |
 | `ConfigDY8.py` | CRAB PSet stub (8 threads; must match `numCores`) |
+| `tools/` | helpers: keep-rule sync, MiniAOD-preserving payload, validation-batch check |
+| `scripts_plot/` | photon-origin truth matching and the DYcentral comparison plots — see its own README |
+
+Not tracked (in `.gitignore`) — machine-local, regenerated, or personal:
+
+| | |
+|---|---|
+| `crab_projects/` | CRAB task state; `crab status`/`resubmit` read it |
+| `crab_configs/` | the per-task configs `submit_run3.sh` generates from the templates |
+| `local/` | your logs, watchdogs and one-off submission scripts. Nothing in the pipeline reads it — the author's are left in place as worked examples |
+
+## Tools
+
+```bash
+python3 tools/sync_keep_rules.py          # put the gen keep rules into job/*.sh
+python3 tools/make_keepmini_payload.py    # build a payload that KEEPS the MiniAOD
+python3 tools/check_test_batch.py         # filter efficiency, file size, GenPart content
+```
+
+`check_test_batch.py` is the one to run first on any new era or filter change:
+it reports events/job, MB/event and the `GenPart` composition, and compares
+them against the old production. **Run a 10-job validation batch and check it
+before submitting tasks** — the efficiency decides the job count, and getting
+it wrong by 3× is the difference between one fold and a third of one.
 
 Two things that are easy to break:
 
