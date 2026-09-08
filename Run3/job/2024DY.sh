@@ -163,7 +163,7 @@ use_release $MINI_REL el8_amd64_gcc12
 Input_filename=$TAG"_"$NJOB"__AOD.root"
 Output_filename=$TAG"_"$NJOB"__MINIAOD.root"
 cmsDriver.py --python_filename $TAG"__MINIAOD__cfg_"$NJOB".py" --eventcontent MINIAODSIM \
-    --customise_commands "process.prunedGenParticles.select.append('keep++ (abs(pdgId) == 111 || abs(pdgId) == 221) && pt > 5')" \
+    --customise_commands "process.prunedGenParticles.select.append('keep++ (abs(pdgId) == 111 || abs(pdgId) == 221) && pt > 5')\nprocess.prunedGenParticles.select.append('keep status == 1 && pt > 0.5')" \
     --customise Configuration/DataProcessing/Utils.addMonitoring \
     --datatier MINIAODSIM --fileout file:$Output_filename \
     --conditions 150X_mcRun3_2024_realistic_v2 --step PAT --geometry DB:Extended \
@@ -183,7 +183,7 @@ use_release $NANO_REL el8_amd64_gcc12
 Input_filename=$TAG"_"$NJOB"__MINIAOD.root"
 Output_filename=$NANOAOD_NAME"__job-"$NJOB"_"$OUTTAG".root"
 cmsDriver.py --python_filename $TAG"__NANOAOD__cfg_"$NJOB".py" --eventcontent NANOAODSIM \
-    --customise_commands "process.finalGenParticles.select.append('keep++ (abs(pdgId) == 111 || abs(pdgId) == 221) && pt > 5')" \
+    --customise_commands "process.finalGenParticles.select.append('keep++ (abs(pdgId) == 111 || abs(pdgId) == 221) && pt > 5')\nprocess.finalGenParticles.select.append('keep status == 1 && pt > 0.5')" \
     --customise Configuration/DataProcessing/Utils.addMonitoring \
     --datatier NANOAODSIM --fileout file:$Output_filename \
     --conditions 150X_mcRun3_2024_realistic_v2 --step NANO --scenario pp \
