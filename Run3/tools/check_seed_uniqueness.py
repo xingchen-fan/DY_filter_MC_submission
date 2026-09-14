@@ -55,6 +55,9 @@ def overlap(a, b):
 
 def main(a):
     tasks = sorted([d for d in glob.glob(os.path.join(a.dir, "*")) if os.path.isdir(d)])
+    if a.tasks:
+        want = set(a.tasks.split(","))
+        tasks = [t for t in tasks if os.path.basename(t) in want]
     tasks = tasks[:a.max_tasks]
     if len(tasks) < 2:
         print("Only %d task(s); the cross-task check does not apply "
@@ -108,4 +111,9 @@ if __name__ == "__main__":
                     help="era output directory; one subdirectory per task")
     ap.add_argument("--jobs", default="5,7,11,23,41", help="job indices to sample")
     ap.add_argument("--max-tasks", type=int, default=6)
+    ap.add_argument("--tasks", default="",
+                    help="comma-separated task subdirectory names to restrict to. "
+                         "Use it to check one production round on its own: a "
+                         "directory that also holds rounds produced before the "
+                         "seed fix will otherwise report their known collisions.")
     sys.exit(main(ap.parse_args()))
