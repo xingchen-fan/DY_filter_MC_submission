@@ -81,16 +81,18 @@ the worker node.
 `submit_run3.sh` defaults to 10,000 jobs per task. For a first run, override it:
 
 ```bash
-./submit_run3.sh --units 10 2023preBPix 1 <your_initials> 1
+./submit_run3.sh --units 10 2023preBPix 1 p1 1
 ```
 
 * `--units 10` — 10 jobs instead of 10,000
 * `2023preBPix` — the era; one of
   `2022preEE` `2022postEE` `2023preBPix` `2023postBPix` `2024_2E` `2024_2Mu`
 * `1` — number of tasks
-* `<your_initials>` — **use your own initials.** The tag goes into the request
-  name and into every output filename, so two people submitting the same era
-  never collide.
+* `<tag>` — the production round, not your name. Use `p1` for phase 1, `p2`
+  for phase 2, and so on; a task then comes out as `p1_7`. The output already
+  lives under your own `$USER` directory, so two people cannot collide, and a
+  tag that says which round the files belong to is far more useful later than
+  one that says who submitted them.
 * `1` — first index; the task is named `<tag>_1`
 
 You should see, per task:
@@ -219,7 +221,7 @@ means nothing.
 Only after the small run has landed output and passed section 7:
 
 ```bash
-./submit_run3.sh 2023preBPix 8 <your_initials> 2
+./submit_run3.sh 2023preBPix 8 p1 2
 ```
 
 8 tasks of 10,000 jobs, numbered `<tag>_2 ... <tag>_9`.
