@@ -1,5 +1,9 @@
 # Run 3 DY filter MC — job submission
 
+**Submitting for the first time?** Start with [`TUTORIAL.md`](TUTORIAL.md),
+a walkthrough from `git clone` to a full era with a check after every step.
+This file is the reference: what the sample is and how many jobs it needs.
+
 Private DY production with a GEN-level π⁰/η filter, so that only events that can
 enter the DY + fake photon selection are simulated, saving most of the
 SIM/DIGI/RECO CPU. Full chain per job: LHE+GEN → SIM → DIGI+DATAMIX+HLT →
@@ -120,15 +124,18 @@ You need a grid certificate installed first:
 ## Submit
 
 ```bash
-./submit_run3.sh [--dest <xrootd-url>] <era> <n_tasks> <your_tag> [first_index]
+./submit_run3.sh [--dest <xrootd-url>] [--units N] <era> <n_tasks> <your_tag> [first_index]
 ```
 
-* `era` — `2022postEE` | `2023preBPix` | `2023postBPix` | `2024_2E` | `2024_2Mu`
+* `era` — `2022preEE` | `2022postEE` | `2023preBPix` | `2023postBPix` | `2024_2E` | `2024_2Mu`
 * `n_tasks` — each task is 10,000 jobs (CRAB's per-task limit)
 * `your_tag` — **use your initials.** It goes into the request name and the
   output file names, so two people submitting the same era never collide.
 * `first_index` — start of the numbering, default 1; use it to continue a series
 * `--dest` — output base; see below
+* `--units` — jobs per task, default 10,000 (CRAB's limit). Use a small
+  value for a first run or an acceptance test, so it goes through the real
+  submission path rather than a hand-written config
 
 Example — 3 tasks (30,000 jobs) of 2022postEE:
 
