@@ -9,6 +9,41 @@ DIR=${ARGDIR#*=}
 NEVENTS=${ARG#*=}
 NJOB=$1
 OUTTAG=${ARGTAG#*=}
+
+# --- LHE seed ---------------------------------------------------------------
+# Until 2026-09-13 this was initialSeed = the job index. That index is the
+# ProcId WITHIN a task, and every task runs ProcId 1..totalUnits, so the
+# same-numbered job of two different tasks generated the SAME hard-process
+# events. Measured across 13 tasks of one 2022postEE production: only 29.9%
+# of the accumulated events were distinct, and the 13th task added just 10%
+# as many new events as the first.
+#
+# None of the usual checks catch this -- event counts, file counts, tree
+# entries and run:lumi:event all look normal, because the problem is the
+# independence of the events, not their number.
+#
+# Each task is now given a unique SeedBase by the submitter, and the real
+# seed is SeedBase + ProcId. Parse by NAME, not by position: the 2024 eras
+# pass an extra FLAV argument, which shifts everything after it.
+SEEDBASE=""
+for _a in "$@"; do
+  case "$_a" in SeedBase=*) SEEDBASE=${_a#SeedBase=} ;; esac
+done
+case "$SEEDBASE" in
+  ''|*[!0-9]*)
+    echo "FATAL: SeedBase missing or not an integer ('$SEEDBASE')."
+    echo "       Every CRAB task needs its own SeedBase, otherwise the"
+    echo "       same-numbered jobs of different tasks share an LHE seed and"
+    echo "       produce duplicate hard-process events."
+    echo "       Submit with submit_run3.sh, which allocates one per task."
+    echo "       Hand-written crabConfigs must set it themselves; check them"
+    echo "       with tools/check_seed_bases.py."
+    exit 65 ;;
+esac
+SEED=$(( SEEDBASE + NJOB ))
+echo "LHE seed: SeedBase=$SEEDBASE + ProcId=$NJOB -> $SEED"
+# ----------------------------------------------------------------------------
+
 # Where the finished NanoAOD is written. $DIR is appended to OUT_BASE, so
 # DIR=<era> lands in .../pelai/HZg/root_DYfilter/phase1/<era>. An optional 5th
 # scriptArg DEST=<full xrootd URL> overrides the whole thing.
@@ -82,7 +117,7 @@ cmsDriver.py Configuration/GenProduction/python/$Fragment_filename \
     --customise Configuration/DataProcessing/Utils.addMonitoring \
     --datatier GEN-SIM --fileout file:$Output_filename \
     --conditions 130X_mcRun3_2023_realistic_v14 --beamspot Realistic25ns13p6TeVEarly2023Collision \
-    --customise_commands "from IOMC.RandomEngine.RandomServiceHelper import RandomNumberServiceHelper ; randSvc = RandomNumberServiceHelper(process.RandomNumberGeneratorService) ; randSvc.populate() ; process.RandomNumberGeneratorService.externalLHEProducer.initialSeed = int($NJOB)\nprocess.source.numberEventsInLuminosityBlock = cms.untracked.uint32(100)" \
+    --customise_commands "from IOMC.RandomEngine.RandomServiceHelper import RandomNumberServiceHelper ; randSvc = RandomNumberServiceHelper(process.RandomNumberGeneratorService) ; randSvc.populate() ; process.RandomNumberGeneratorService.externalLHEProducer.initialSeed = int($SEED)\nprocess.source.numberEventsInLuminosityBlock = cms.untracked.uint32(100)" \
     --step LHE,GEN,SIM --geometry DB:Extended --era Run3_2023 \
     --no_exec --mc -n $NEVENTS --nThreads 4
 cmsRun $TAG"__GS__cfg_"$NJOB".py"

@@ -24,13 +24,18 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --dest) DEST_BASE=$2; shift 2 ;;
     --dest=*) DEST_BASE=${1#--dest=}; shift ;;
+    # Jobs per task (default 10000, the CRAB limit). For small acceptance
+    # runs, so the test goes through the real submission path -- including
+    # the SeedBase allocation -- instead of a hand-written config.
+    --units) UNITS=$2; shift 2 ;;
+    --units=*) UNITS=${1#--units=}; shift ;;
     *) break ;;
   esac
 done
 
 ERA=$1; N=$2; TAG=$3; START=${4:-1}
 [ -z "$TAG" ] && {
-  echo "usage: $0 [--dest <xrootd-url>] <era> <n_tasks> <your_tag> [first_index]"
+  echo "usage: $0 [--dest <xrootd-url>] [--units N] <era> <n_tasks> <your_tag> [first_index]"
   exit 1; }
 
 CFG=crabConfig_${ERA}.py
@@ -87,6 +92,42 @@ esac
 # Paths INSIDE the config (psetName, scriptExe, inputFiles, workArea) are
 # resolved against the CWD of `crab submit`, not against the config's location,
 # so this move is safe as long as you submit from this directory.
+
+# --- LHE seed base (2026-09-13) ---------------------------------------------
+# The payload used to set initialSeed to the ProcId, and every task runs
+# ProcId 1..totalUnits, so the same-numbered jobs of different tasks shared an
+# LHE seed and generated the same hard-process events. Measured across 13
+# tasks: only 29.9% of the accumulated events were distinct.
+#
+# A registry, rather than a hard-coded tag->index table: any tag works without
+# collisions, and resubmitting a task returns the SeedBase it already had
+# (idempotent). Plain text, so it can be read and audited by hand.
+SEED_REGISTRY=seed_registry.txt
+SEED_STRIDE=20000        # >= totalUnits (10000), with a factor of two to spare
+SEED_MAX=900000000       # hard limit of CMSSW's RandomNumberGeneratorService
+SEED_RESERVED=800000000  # above this line: hand-written / test tasks only
+touch "$SEED_REGISTRY"
+
+alloc_seedbase() {       # $1 = key, e.g. 2022postEE/p1_1
+  local key=$1 lock=.seed_registry.lock existing next tries=0
+  while ! mkdir "$lock" 2>/dev/null; do
+    tries=$((tries + 1))
+    [ $tries -gt 60 ] && { echo "ERROR: seed registry locked for over 60 s" >&2; return 1; }
+    sleep 1
+  done
+  existing=$(awk -v k="$key" '$2 == k {print $1; exit}' "$SEED_REGISTRY")
+  if [ -n "$existing" ]; then rmdir "$lock"; echo "$existing"; return 0; fi
+  # Only values below the reserved line: otherwise a hand-written task's
+  # 800000000 would push the allocation point up with it.
+  next=$(awk -v lim=$SEED_RESERVED 'BEGIN{m=0} $1+0>0 && $1+0<lim {if ($1+0 > m) m=$1+0} END{print m}' "$SEED_REGISTRY")
+  next=$((next + SEED_STRIDE))
+  if [ $((next + 10000)) -ge $SEED_RESERVED ]; then
+    rmdir "$lock"; echo "ERROR: seed space exhausted ($next)" >&2; return 1; fi
+  printf '%d %s %s\n' "$next" "$key" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$SEED_REGISTRY"
+  rmdir "$lock"; echo "$next"
+}
+# ----------------------------------------------------------------------------
+
 mkdir -p crab_configs
 
 for i in $(seq "$START" $((START + N - 1))); do
@@ -97,7 +138,17 @@ for i in $(seq "$START" $((START + N - 1))); do
   sed -i "s@\(config.General.requestName = \).*@\1'DY${ERA}_${T}'@" "$WORK"
   ARGS="'Nevents=10000', 'Tag=${T}', 'DIR=${DIR}', 'DEST=${OUT_BASE}/${DIR}'"
   [ -n "$FLAV" ] && ARGS="$ARGS, 'FLAV=${FLAV}'"
+  # SeedBase goes last, so the existing positional arguments are untouched
+  # ($2..$5 stay Nevents/Tag/DIR/DEST, and $6 stays FLAV for 2024). The
+  # payload looks it up by name, so the position does not matter.
+  SEEDBASE=$(alloc_seedbase "${ERA}/${T}") || exit 1
+  ARGS="$ARGS, 'SeedBase=${SEEDBASE}'"
+  echo "  seed base $SEEDBASE  (seeds $((SEEDBASE + 1))..$((SEEDBASE + 10000)))"
   sed -i "s@\(config.JobType.scriptArgs = \).*@\1[${ARGS}]@" "$WORK"
+  if [ -n "$UNITS" ]; then
+    sed -i "s@\(config.Data.totalUnits *= *\).*@\1${UNITS}@" "$WORK"
+    echo "  totalUnits -> $UNITS"
+  fi
 
   # 2024 spreads the load over 15 premix slices; everything else has one list
   if [ "$DIR" = 2024 ]; then
