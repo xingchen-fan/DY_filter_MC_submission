@@ -160,7 +160,7 @@ def main(files, nmax, tag, dump=None, pho_id=True, muon_only=False,
     if dump_fh:
         dump_fh.write("# pho_pt pho_eta near_dr near_pt near_pdg cat channel "
                       "m_ll pt_ll m_llg pt_llg or_pass "
-                      "n_genjet gj_mindr gj_pt\n")
+                      "n_genjet gj_mindr gj_pt near_gen_photon\n")
     t0 = time.time()
 
     for ev in events:
@@ -305,13 +305,22 @@ def main(files, nmax, tag, dump=None, pho_id=True, muon_only=False,
                     gj_dr, gj_pt = dj, j.pt()
             # everything from m_ll onward is appended at the end, so files
             # written before these columns existed still parse.
+            # Is there ANY status-1 gen photon in the cone, with no pT
+            # requirement? That is the criterion under discussion, and it
+            # differs from the AN rule (nearest particle, pT > 5). Stored as a
+            # flag rather than cut here, so the working point stays downstream.
+            near_ph = 0
+            for q in h_pk.product():
+                if q.pdgId() == 22 and dr(q.eta(), q.phi(), g.eta(), g.phi()) < DR_MATCH:
+                    near_ph = 1
+                    break
             dump_fh.write("%.3f %.3f %.4f %.3f %d %s %s %.4f %.4f %.4f %.4f %d "
-                          "%d %.4f %.3f\n"
+                          "%d %.4f %.3f %d\n"
                           % (g.pt(), g.eta(), d,
                              matched.pt() if matched else -1,
                              matched.pdgId() if matched else 0, c, best_ch,
                              best_z.M(), best_z.Pt(), h.M(), h.Pt(), or_pass,
-                             gj.size(), gj_dr, gj_pt))
+                             gj.size(), gj_dr, gj_pt, near_ph))
         cat_ch[best_ch + "_" + c] += 1
         if c == "other" and matched is not None:
             pdg_of_other[abs(matched.pdgId())] += 1

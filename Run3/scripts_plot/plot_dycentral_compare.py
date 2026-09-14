@@ -411,9 +411,23 @@ def main(a):
             cen = ("DYcentral jet #gamma",
                    "%s/root_DYcentral/DYcentral_jet/%s.root" % (BASE, a.era),
                    None, None, ROOT.kGreen + 2)
+        # The comment above says the two sides are compared on jet+other, but
+        # until 2026-09-10 only the CENTRAL side had that cut -- the filter side
+        # was the whole sample. --filter-genjet applies the identical AN cut to
+        # the filter side, which is the matched comparison and the one Xingchen
+        # asked for. The columns exist on both sides (verified 2026-09-10).
+        _filt_cut = None
+        _filt_tag = ""
+        if a.filter_genjet:
+            _filt_cut = (("photon_near_genjet_dr", "photon_near_genjet_pt"),
+                         lambda d: (d["photon_near_genjet_dr"] < 0.1)
+                                   & (d["photon_near_genjet_pt"] > 5.0))
+            _filt_tag = " (jet+other)"
+        elif a.filter_genmatch:
+            _filt_cut = ("photon_genPartFlav", 0)
+            _filt_tag = " (non-prompt)"
         spec = [cen,
-                ("DYfilter" + (" (non-prompt)" if a.filter_genmatch
-                                else ""),
+                ("DYfilter" + _filt_tag,
                  "%s/%s/%s.root" % (BASE, a.filter_dir, a.era),
                  # The gen filter only guarantees a pi0/eta photon exists SOMEWHERE
                  # in the event; the photon the analysis actually selected may be a
@@ -423,7 +437,7 @@ def main(a):
                  # reco-level truth-matched class, so without this cut the two
                  # samples are different POPULATIONS and the comparison is not a
                  # closure test. Dropping them takes <n_jets> from 2.29x to 1.31x.
-                 ("photon_genPartFlav", 0) if a.filter_genmatch else None,
+                 _filt_cut,
                  None, ROOT.kBlack)]
         # ratio_of names the DENOMINATOR. Our constructed sample goes there so the
         # ratio is DYcentral/ours and the points inherit the coloured curve.
@@ -568,6 +582,11 @@ if __name__ == "__main__":
     ap.add_argument("--central-dir",
                     default="root_DYcentral_v2/Bkg_MC/DYJetsToLL",
                     help="path under BASE for --central-v2")
+    ap.add_argument("--filter-genjet", action="store_true",
+                    help="apply the SAME AN gen-jet cut to the DYfilter side as "
+                         "--central-v2 applies to the central side, so both are "
+                         "jet+other. Without it the filter side is the whole "
+                         "sample and the two sides are different populations.")
     ap.add_argument("--filter-genmatch", action="store_true",
                     help="keep only DYfilter photons with genPartFlav==0 "
                          "(non-prompt), so the sample is the same population as "
