@@ -22,7 +22,26 @@ in `75 < m_ll < 105 GeV`. Measured on a 10-job validation batch:
 | 2022postEE | 976 events/job (9.76%) | 303 events/job (3.03%) |
 | 2024_2E | — | 145 events/job (1.45%) |
 
-so **3.22× more jobs** are needed for the same statistics in 2022postEE.
+so 3.22x more jobs are needed for the same number of **gen-filtered events**.
+
+That is not the number to plan with. What matters is how many events survive
+the analysis baseline, and the two do not scale together -- the new filter
+mostly removes events that would have failed the baseline anyway. Measured on
+the full 2022postEE productions, per CRAB job, on SR + Sideband with the same
+corrections and the same overlap removal on both sides:
+
+| | baseline events | CRAB jobs | per job |
+|---|---|---|---|
+| old filter | 9,499 | 30,261 | 0.3139 +- 0.0032 |
+| new filter | 3,717 | 12,604 | 0.2949 +- 0.0048 |
+
+The ratio is 0.939 +- 0.018: the new filter costs about **6% +- 2%** of the
+analysis statistics per job, not a factor of three. Plan with ~1.06x.
+
+Compare like with like if you repeat this. The old production had the control
+regions enabled and the new one did not, so summing every `*__inclusive` tree
+gives 12,119 vs 3,717 and a spurious 22% deficit. SR + Sideband is the common
+basis.
 
 **2. A second gen-particle keep rule** in the cmsDriver steps of `job/*.sh`:
 
@@ -136,9 +155,14 @@ priority and slows everyone down.
 
 ## How many jobs
 
-⚠️ **The table below is for the OLD filter.** With the new one, multiply every
-job count by **3.22** (2022postEE measurement). The 2024 rows are worse still —
-its new-filter efficiency is 1.45%, so about 6.7× the old count.
+The table below is for the OLD filter. For 2022postEE the new filter needs
+about **1.06x** these numbers, not 3.22x -- see "What changed in the current
+round". 3.22 is the gen-filter efficiency ratio and it does not carry through
+to the baseline.
+
+2024 has not been measured this way. Its gen-filter efficiency is much lower
+(1.45%), but whether that costs baseline statistics is exactly what the
+efficiency ratio cannot tell you -- measure it before scaling the 2024 rows.
 
 For Run 3, assuming jet photon events make up 55% of total DY after baseline,
 one fold of statistics needs:

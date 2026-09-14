@@ -119,7 +119,7 @@ cmsDriver.py Configuration/GenProduction/python/$Fragment_filename \
     --conditions 124X_mcRun3_2022_realistic_postEE_v1 --beamspot Realistic25ns13p6TeVEarly2022Collision \
     --customise_commands "from IOMC.RandomEngine.RandomServiceHelper import RandomNumberServiceHelper ; randSvc = RandomNumberServiceHelper(process.RandomNumberGeneratorService) ; randSvc.populate() ; process.RandomNumberGeneratorService.externalLHEProducer.initialSeed = int($SEED)\nprocess.source.numberEventsInLuminosityBlock = cms.untracked.uint32(100)" \
     --step LHE,GEN,SIM --geometry DB:Extended --era Run3 \
-    --no_exec --mc -n $NEVENTS --nThreads 4
+    --no_exec --mc -n $NEVENTS --nThreads 8
 cmsRun $TAG"__GS__cfg_"$NJOB".py"
 
 if [ -e $Output_filename ]
@@ -140,7 +140,7 @@ cmsDriver.py --python_filename $TAG"__DIGIPREMIX__cfg_"$NJOB".py" --eventcontent
     --conditions 124X_mcRun3_2022_realistic_postEE_v1 --step DIGI,DATAMIX,L1,DIGI2RAW,HLT:2022v14 \
     --procModifiers premix_stage2,siPixelQualityRawToDigi --geometry DB:Extended \
     --filein file:$Input_filename --datamix PreMix --era Run3 \
-    --no_exec --mc -n -1 --nThreads 4
+    --no_exec --mc -n -1 --nThreads 8
 cmsRun $TAG"__DIGIPREMIX__cfg_"$NJOB".py"
 
 if [ -e $Output_filename ]
@@ -158,7 +158,7 @@ cmsDriver.py --python_filename $TAG"__AOD__cfg_"$NJOB".py" --eventcontent AODSIM
     --datatier AODSIM --fileout file:$Output_filename \
     --conditions 124X_mcRun3_2022_realistic_postEE_v1 --step RAW2DIGI,L1Reco,RECO,RECOSIM --procModifiers siPixelQualityRawToDigi \
     --geometry DB:Extended --filein file:$Input_filename --era Run3 \
-    --no_exec --mc -n -1 --nThreads 4
+    --no_exec --mc -n -1 --nThreads 8
 cmsRun $TAG"__AOD__cfg_"$NJOB".py"
 
 if [ -e $Output_filename ]
@@ -178,7 +178,7 @@ cmsDriver.py --python_filename $TAG"__MINIAOD__cfg_"$NJOB".py" --eventcontent MI
     --datatier MINIAODSIM --fileout file:$Output_filename \
     --conditions 130X_mcRun3_2022_realistic_postEE_v6 --step PAT --geometry DB:Extended \
     --filein file:$Input_filename --era Run3,run3_miniAOD_12X \
-    --no_exec --mc -n -1 --nThreads 4
+    --no_exec --mc -n -1 --nThreads 8
 cmsRun $TAG"__MINIAOD__cfg_"$NJOB".py"
 
 if [ -e $Output_filename ]
@@ -198,7 +198,7 @@ cmsDriver.py --python_filename $TAG"__NANOAOD__cfg_"$NJOB".py" --eventcontent NA
     --datatier NANOAODSIM --fileout file:$Output_filename \
     --conditions 130X_mcRun3_2022_realistic_postEE_v6 --step NANO --scenario pp \
     --filein file:$Input_filename --era Run3 \
-    --no_exec --mc -n -1 --nThreads 4
+    --no_exec --mc -n -1 --nThreads 8
 cmsRun $TAG"__NANOAOD__cfg_"$NJOB".py"
 
 if [ -e $Output_filename ]
