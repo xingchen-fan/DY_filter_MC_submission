@@ -1,5 +1,9 @@
 # Run 3 DY filter MC — job submission
 
+**Submitting for the first time?** Start with [`TUTORIAL.md`](TUTORIAL.md),
+a walkthrough from `git clone` to a full era with a check after every step.
+This file is the reference: what the sample is and how many jobs it needs.
+
 Private DY production with a GEN-level π⁰/η filter, so that only events that can
 enter the DY + fake photon selection are simulated, saving most of the
 SIM/DIGI/RECO CPU. Full chain per job: LHE+GEN → SIM → DIGI+DATAMIX+HLT →
