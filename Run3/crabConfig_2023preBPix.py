@@ -19,7 +19,11 @@ config.JobType.inputFiles = ['premix_lists/premix_ondisk_2023preBPix.txt',
                              'gen_filter/MatchDYFilter.cc',
                              'gen_filter/BuildFile.xml']
 config.JobType.numCores = 8
-config.JobType.maxMemoryMB = 20000
+# 2026-09-14: 20000 is exactly the 2.5 GB/core ceiling for an 8-core job and
+# matches badly -- a 5-job test sat idle for 12 h at 20000 and started within
+# 2 h at 16000. Measured peak across 1,227 finished jobs is 13,722 MB at four
+# threads and 13,646 MB at eight, so 16000 leaves ~17% headroom.
+config.JobType.maxMemoryMB = 16000
 config.JobType.maxJobRuntimeMin = 600
 
 config.Data.splitting = 'EventBased'
