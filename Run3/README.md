@@ -43,6 +43,19 @@ regions enabled and the new one did not, so summing every `*__inclusive` tree
 gives 12,119 vs 3,717 and a spurious 22% deficit. SR + Sideband is the common
 basis.
 
+**1.06x is not the truth-matching number.** Two different quantities get
+confused here, so to be explicit:
+
+| | what it measures | value |
+|---|---|---|
+| **1.06x** | production side: analysis events per CRAB job, new gen filter vs old | ratio 0.939 +- 0.018, i.e. the new filter costs ~6% |
+| **~11-15%** | analysis side: what a `dR < 0.1` truth-matching requirement removes from the filter sample at full baseline | 11.1% +- 4.3% measured; 15.0% is an exact upper bound |
+
+They are unrelated. The 15.0% is a bound rather than an estimate because jet
+photons make up 85% of the filter sample at full baseline and such a
+requirement keeps 100% of them by construction, so it cannot remove more than
+the remaining 15%.
+
 **2. A second gen-particle keep rule** in the cmsDriver steps of `job/*.sh`:
 
 ```python
