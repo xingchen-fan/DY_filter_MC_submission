@@ -129,8 +129,11 @@ You need a grid certificate installed first:
 
 * `era` — `2022preEE` | `2022postEE` | `2023preBPix` | `2023postBPix` | `2024_2E` | `2024_2Mu`
 * `n_tasks` — each task is 10,000 jobs (CRAB's per-task limit)
-* `your_tag` — **use your initials.** It goes into the request name and the
-  output file names, so two people submitting the same era never collide.
+* `your_tag` — the production round, not your name. Use `p1` for phase 1, `p2`
+  for phase 2, and so on; a task then comes out as `p1_7`. The output already
+  lives under your own `$USER` directory, so two people cannot collide, and a
+  tag that says which round the files belong to is far more useful later than
+  one that says who submitted them.
 * `first_index` — start of the numbering, default 1; use it to continue a series
 * `--dest` — output base; see below
 * `--units` — jobs per task, default 10,000 (CRAB's limit). Use a small
@@ -140,7 +143,7 @@ You need a grid certificate installed first:
 Example — 3 tasks (30,000 jobs) of 2022postEE:
 
 ```bash
-./submit_run3.sh 2022postEE 3 pz
+./submit_run3.sh 2022postEE 3 p1
 ```
 
 ### Where the output goes
