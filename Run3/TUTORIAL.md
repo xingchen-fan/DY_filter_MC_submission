@@ -153,16 +153,17 @@ the events, not their number.
 
 So:
 
-* `submit_run3.sh` allocates a unique `SeedBase` per task from
-  `seed_registry.txt` and records it. Resubmitting the same task returns the
-  same value, so it is safe to re-run.
-* **`seed_registry.txt` must be committed.** It is the record of which task got
-  which seed range. A registry that only exists on your disk protects nobody.
+* `submit_run3.sh` allocates it for you. You never set it by hand.
+* Each submitter has a block in `seed_blocks.txt`, and allocation happens inside
+  it, so two people cannot collide even submitting at the same moment from their
+  own clones. Add yourself a line there the first time; without one, submission
+  stops rather than guessing a block.
+* Resubmitting the same task returns the same value, so re-running is safe.
 * A job with no `SeedBase` **exits 65** rather than falling back to a default.
-  A silent default is exactly how the original bug produced two weeks of output
-  that looked correct.
-* Hand-written configs must set `SeedBase` themselves, above `800000000` which
-  is reserved for exactly that, and then pass `tools/check_seed_bases.py`.
+  A silent default is how the original bug produced two weeks of output that
+  looked correct.
+* Hand-written configs set `SeedBase` themselves, above `800000000`, and then
+  pass `tools/check_seed_bases.py`.
 
 ---
 
