@@ -26,7 +26,7 @@ while [ $# -gt 0 ]; do
     --dest=*) DEST_BASE=${1#--dest=}; shift ;;
     # Jobs per task (default 10000, the CRAB limit). For small acceptance
     # runs, so the test goes through the real submission path -- including
-    # the SeedBase allocation -- instead of a hand-written config.
+    # real submission path instead of a hand-written config.
     --units) UNITS=$2; shift 2 ;;
     --units=*) UNITS=${1#--units=}; shift ;;
     *) break ;;
@@ -93,69 +93,12 @@ esac
 # resolved against the CWD of `crab submit`, not against the config's location,
 # so this move is safe as long as you submit from this directory.
 
-# --- LHE seed base (2026-09-13) ---------------------------------------------
-# The payload used to set initialSeed to the ProcId, and every task runs
-# ProcId 1..totalUnits, so the same-numbered jobs of different tasks shared an
-# LHE seed and generated the same hard-process events. Measured across 13
-# tasks: only 29.9% of the accumulated events were distinct.
-#
-# A registry, rather than a hard-coded tag->index table: any tag works without
-# collisions, and resubmitting a task returns the SeedBase it already had
-# (idempotent). Plain text, so it can be read and audited by hand.
-SEED_REGISTRY=seed_registry.txt
-SEED_BLOCKS=seed_blocks.txt
-SEED_BLOCK_SIZE=10000000 # one block per submitter, 500 tasks each
-SEED_STRIDE=20000        # >= totalUnits (10000), with a factor of two to spare
-SEED_RESERVED=800000000  # block 80 and up: hand-written / test configs only
-touch "$SEED_REGISTRY"
-
-# Which block this submitter owns. Failing here rather than guessing a block is
-# deliberate: a guessed block is the silent collision the scheme exists to stop.
-seed_block() {
-  local b
-  b=$(awk -v u="$USER" '$1 == u {print $2; exit}' "$SEED_BLOCKS" 2>/dev/null)
-  case "$b" in
-    ''|*[!0-9]*)
-      echo "ERROR: no seed block for '$USER' in $SEED_BLOCKS." >&2
-      echo "       Append a line '<username> <next free block>', then submit" >&2
-      echo "       again. Blocks in use:" >&2
-      awk '!/^#/ && NF==2 {printf "         %-12s %s\n", $1, $2}' "$SEED_BLOCKS" >&2
-      return 1 ;;
-  esac
-  [ "$b" -ge 1 ] && [ "$b" -lt 80 ] || {
-    echo "ERROR: block $b is out of range (1..79)." >&2; return 1; }
-  echo "$b"
-}
-
-# Allocate inside this submitter's block. Blocks do not overlap, so two people
-# submitting at the same moment from their own clones cannot collide, with no
-# pull and no shared file needed. The registry records what was issued.
-alloc_seedbase() {       # $1 = key, e.g. 2022postEE/p1_1
-  local key=$1 lock=.seed_registry.lock existing next lo hi blk tries=0
-  blk=$(seed_block) || return 1
-  lo=$((blk * SEED_BLOCK_SIZE))
-  hi=$((lo + SEED_BLOCK_SIZE))
-  while ! mkdir "$lock" 2>/dev/null; do
-    tries=$((tries + 1))
-    [ $tries -gt 60 ] && { echo "ERROR: seed registry locked for over 60 s" >&2; return 1; }
-    sleep 1
-  done
-  # Same key twice returns the same value, so resubmitting a task is safe.
-  # The key must be matched together with the submitter: <era>/<tag> is not
-  # unique between people, and matching on it alone hands the second person the
-  # first person's SeedBase -- which is the collision this is here to prevent.
-  existing=$(awk -v k="$key" -v u="$USER" '$2 == k && $3 == u {print $1; exit}' "$SEED_REGISTRY")
-  if [ -n "$existing" ]; then rmdir "$lock"; echo "$existing"; return 0; fi
-  # Only values inside this block matter; everyone else's are irrelevant here.
-  next=$(awk -v lo=$lo -v hi=$hi 'BEGIN{m=0} $1+0>=lo && $1+0<hi {if ($1+0 > m) m=$1+0} END{print m}' "$SEED_REGISTRY")
-  [ "$next" -eq 0 ] && next=$lo
-  next=$((next + SEED_STRIDE))
-  if [ $((next + 10000)) -ge $hi ]; then
-    rmdir "$lock"
-    echo "ERROR: block $blk is full ($next). Take a second block." >&2; return 1; fi
-  printf '%d %s %s %s\n' "$next" "$key" "$USER" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$SEED_REGISTRY"
-  rmdir "$lock"; echo "$next"
-}
+# --- LHE seed ---------------------------------------------------------------
+# Derived in the payload from Submitter, era, tag and ProcId -- see job/*.sh.
+# Nothing is allocated here: no registry to keep in step, no lock, and two
+# people submitting at the same moment from their own clones cannot land on the
+# same seeds. All this script contributes is who is submitting, since $USER on
+# a worker node is the pool account rather than the person.
 # ----------------------------------------------------------------------------
 
 mkdir -p crab_configs
@@ -168,12 +111,10 @@ for i in $(seq "$START" $((START + N - 1))); do
   sed -i "s@\(config.General.requestName = \).*@\1'DY${ERA}_${T}'@" "$WORK"
   ARGS="'Nevents=10000', 'Tag=${T}', 'DIR=${DIR}', 'DEST=${OUT_BASE}/${DIR}'"
   [ -n "$FLAV" ] && ARGS="$ARGS, 'FLAV=${FLAV}'"
-  # SeedBase goes last, so the existing positional arguments are untouched
+  # Submitter goes last, so the existing positional arguments are untouched
   # ($2..$5 stay Nevents/Tag/DIR/DEST, and $6 stays FLAV for 2024). The
   # payload looks it up by name, so the position does not matter.
-  SEEDBASE=$(alloc_seedbase "${ERA}/${T}") || exit 1
-  ARGS="$ARGS, 'SeedBase=${SEEDBASE}'"
-  echo "  seed base $SEEDBASE  (seeds $((SEEDBASE + 1))..$((SEEDBASE + 10000)))"
+  ARGS="$ARGS, 'Submitter=${USER}'"
   sed -i "s@\(config.JobType.scriptArgs = \).*@\1[${ARGS}]@" "$WORK"
   if [ -n "$UNITS" ]; then
     sed -i "s@\(config.Data.totalUnits *= *\).*@\1${UNITS}@" "$WORK"

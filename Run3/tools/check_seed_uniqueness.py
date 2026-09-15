@@ -2,9 +2,9 @@
 
 Before 2026-09-13 the payload set initialSeed to the ProcId, and every task
 runs ProcId 1..totalUnits, so the same-numbered jobs of different tasks
-generated the same hard-process events. The fix gives each task a unique
-SeedBase (see tools/check_seed_bases.py); this script verifies on the OUTPUT
-that the fix actually took effect.
+generated the same hard-process events. The seed is now a hash of submitter, era, tag
+and ProcId; this script verifies on the OUTPUT that different tasks really are
+independent.
 
     python3 tools/check_seed_uniqueness.py --dir <era output dir> [--jobs 5,7,11] [--max-tasks 6]
 
@@ -98,7 +98,8 @@ def main(a):
     if bad:
         print("ERROR: %d pairs share an LHE seed -- those tasks generate the same "
               "hard-process events." % len(bad))
-        print("       Check the SeedBase values: python3 tools/check_seed_bases.py")
+        print("       Check that every config passes Submitter:")
+        print("       python3 tools/check_submitter.py")
         
         return 1
     print("OK: no shared seeds across tasks")

@@ -26,7 +26,7 @@ config.General.transferOutputs = True
 config.JobType.pluginName = 'PrivateMC'
 config.JobType.psetName = 'ConfigDY8.py'
 config.JobType.scriptExe  = 'job/2022postEEDY_nt8.sh'
-config.JobType.scriptArgs = ['Nevents=10000', 'Tag=nt8test', 'DIR=2022postEE', 'DEST=root://eosuser.cern.ch//eos/project/h/htozg-dy-privatemc/pelai/HZg/root_DYfilter/nt8test/2022postEE', 'SeedBase=800040000']
+config.JobType.scriptArgs = ['Nevents=10000', 'Tag=nt8test', 'DIR=2022postEE', 'DEST=root://eosuser.cern.ch//eos/project/h/htozg-dy-privatemc/pelai/HZg/root_DYfilter/nt8test/2022postEE', 'Submitter=pelai']
 config.JobType.inputFiles = ['premix_lists/premix_ondisk_2022postEE.txt',
                              'FrameworkJobReport.xml',
                              'gen_filter/DYto2L-2Jets_MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8__Run3Summer22EE__fragment.py',
