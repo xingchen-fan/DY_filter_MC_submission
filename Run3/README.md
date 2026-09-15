@@ -252,7 +252,7 @@ Tracked — this is the production:
 | `gen_filter/*fragment.py` | generator fragments, one per era |
 | `premix_lists/` | premix pileup files known to be on disk |
 | `ConfigDY8.py` | CRAB PSet stub (8 threads; must match `numCores`) |
-| `tools/` | helpers: keep-rule sync, MiniAOD-preserving payload, validation-batch check |
+| `tools/` | helpers: keep-rule sync, MiniAOD-preserving payload, validation-batch check, `check_submitter.py` for hand-written configs |
 | `scripts_plot/` | photon-origin truth matching and the DYcentral comparison plots — see its own README |
 
 Not tracked (in `.gitignore`) — machine-local, regenerated, or personal:
