@@ -114,38 +114,40 @@ The `.sub`-equivalent for CRAB is the generated config. Read it back rather than
 trusting the script:
 
 ```bash
-grep -E "SeedBase|totalUnits|numCores|maxMemoryMB|requestName" \
+grep -E "Submitter|totalUnits|numCores|maxMemoryMB|requestName" \
   crab_configs/crabConfig_2023preBPix_<tag>_1.py
 ```
 
-Expect a unique `SeedBase`, your `totalUnits`, and the era's resources.
+Expect your username in `Submitter`, your `totalUnits`, and the era's resources.
 
-Then check the whole repository at once:
+Then check every config at once:
 
 ```bash
-python3 tools/check_seed_bases.py
+python3 tools/check_submitter.py
 ```
 
 This must end with
 
 ```
-OK: all SeedBase values unique, ranges disjoint, within CMSSW limits
+OK: every hand-written config passes Submitter
 ```
 
-If it does not, **do not submit more** until it does.
+A config without `Submitter` makes every one of its jobs exit 65.
 
 ---
 
-## 5. What SeedBase is, and why you cannot skip it
+## 5. Where the seed comes from, and why it matters
 
-Each job seeds the LHE generator with `SeedBase + ProcId`.
+Each job seeds the LHE generator with a hash of four things: who submitted, the
+era, the tag, and the job's ProcId. Change any one of them and the events
+change.
 
-`ProcId` alone is not enough, and this is not hypothetical. Until 2026-09-13 the
-payload used `initialSeed = ProcId`, and since every task runs ProcId
-`1..totalUnits`, **the same-numbered jobs of different tasks generated the same
-hard-process events**. Measured across 13 tasks of one era: only 29.9% of the
-accumulated events were distinct, and the 13th task added a tenth as many new
-events as the first.
+The job index alone is not enough, and this is not hypothetical. Until
+2026-09-13 the payload used `initialSeed = ProcId`, and since every task runs
+ProcId `1..totalUnits`, **the same-numbered jobs of different tasks generated
+the same hard-process events**. Measured across 13 tasks of one era: only 29.9%
+of the accumulated events were distinct, and the 13th task added a tenth as
+many new events as the first.
 
 None of the usual checks see this. Event counts, file counts, tree entries and
 `run:lumi:event` all look normal, because what is wrong is the *independence* of
@@ -153,19 +155,19 @@ the events, not their number.
 
 So:
 
-* `submit_run3.sh` allocates it for you. You never set it by hand.
-* Each submitter has a block in `seed_blocks.txt`, and allocation happens inside
-  it, so two people cannot collide even submitting at the same moment from their
-  own clones. Add yourself a line there the first time; without one, submission
-  stops rather than guessing a block.
-* Resubmitting the same task returns the same value, so re-running is safe.
-* A job with no `SeedBase` **exits 65** rather than falling back to a default.
+* You never set a seed by hand. `submit_run3.sh` passes `Submitter=$USER` and
+  the payload derives the rest.
+* Nothing is shared or coordinated. Two people at different institutions, each
+  in their own clone or fork, get different seeds because their usernames
+  differ -- no table to keep in step, no file to pull first.
+* Resubmitting a job regenerates the same seed, so a retry produces the same
+  events rather than new ones.
+* A job with no `Submitter` **exits 65** rather than falling back to a default.
   A silent default is how the original bug produced two weeks of output that
   looked correct.
-* Hand-written configs set `SeedBase` themselves, above `800000000`, and then
-  pass `tools/check_seed_bases.py`.
-
----
+* Hashing makes repeats rare rather than impossible: roughly 0.04% of jobs in a
+  full non-2024 campaign, against the 0.4% contamination the analysis already
+  carries. Section 7 measures it on the output.
 
 ## 6. Watch it
 
@@ -179,7 +181,7 @@ What the states mean here:
 |---|---|
 | `unsubmitted` at 80-90% | normal. Only about 1,000 jobs of a task enter the global pool at a time |
 | everything `idle` for hours | usually fair-share, not a bug. See section 9 |
-| `failed` with exit code 65 | `SeedBase` did not reach the payload. Check the config, do not resubmit blindly |
+| `failed` with exit code 65 | `Submitter` did not reach the payload. Check the config, do not resubmit blindly |
 
 `crab status --long` adds a per-job table with memory, runtime and CPU
 efficiency, which is what you want when deciding resources.
@@ -251,7 +253,7 @@ way to tell which file came from which.
 
 | symptom | first thing to check |
 |---|---|
-| jobs `failed`, exit code 65 | `SeedBase` missing from the config — `grep SeedBase crab_configs/<config>` |
+| jobs `failed`, exit code 65 | `Submitter` missing from the config — `grep Submitter crab_configs/<config>` |
 | everything `idle` for many hours | `maxMemoryMB`. 8-core jobs are capped at 20,000 MB (2.5 GB/core) and asking for the ceiling matches badly. 16,000 is measured-safe for this payload |
 | jobs vanish: not in the queue, no logs, no output | walltime. CRAB removes them, and because they never exited normally, stdout is never returned |
 | task exists on disk but nothing ever ran | `crab status` and read **"Status on the CRAB server"**. A `SUBMITFAILED` task still leaves a project directory, so any check based on directories existing will pass |

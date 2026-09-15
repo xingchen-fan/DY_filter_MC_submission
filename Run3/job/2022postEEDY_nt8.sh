@@ -11,37 +11,45 @@ NJOB=$1
 OUTTAG=${ARGTAG#*=}
 
 # --- LHE seed ---------------------------------------------------------------
-# Until 2026-09-13 this was initialSeed = the job index. That index is the
-# ProcId WITHIN a task, and every task runs ProcId 1..totalUnits, so the
-# same-numbered job of two different tasks generated the SAME hard-process
-# events. Measured across 13 tasks of one 2022postEE production: only 29.9%
-# of the accumulated events were distinct, and the 13th task added just 10%
-# as many new events as the first.
+# The seed is derived, not allocated: it is a hash of who submitted, which era
+# and round, and the job index. Two submissions differ as soon as any of those
+# differ, so people at different institutions need no shared file, no table and
+# no coordination -- and a fork works exactly like a clone.
 #
-# None of the usual checks catch this -- event counts, file counts, tree
-# entries and run:lumi:event all look normal, because the problem is the
+# Until 2026-09-13 this was initialSeed = the job index alone. That index is
+# the ProcId WITHIN a task and every task runs ProcId 1..totalUnits, so the
+# same-numbered jobs of different tasks generated the SAME hard-process events.
+# Measured across 13 tasks of one era: only 29.9% of the accumulated events
+# were distinct. None of the usual checks see it -- event counts, file counts,
+# tree entries and run:lumi:event all look normal, because what is wrong is the
 # independence of the events, not their number.
 #
-# Each task is now given a unique SeedBase by the submitter, and the real
-# seed is SeedBase + ProcId. Parse by NAME, not by position: the 2024 eras
-# pass an extra FLAV argument, which shifts everything after it.
-SEEDBASE=""
+# Hashing does not guarantee uniqueness, it makes repeats rare: about 0.04% of
+# jobs in a full non-2024 campaign, against the 0.4% contamination the analysis
+# already carries. Verify on the output with tools/check_seed_uniqueness.py.
+#
+# The submitter has to be passed in: $USER on a worker node is the pool account
+# the job runs as, not the person who submitted it. Parse by NAME, not by
+# position -- the 2024 eras pass an extra FLAV argument, which shifts what
+# follows it.
+SUBMITTER=""
 for _a in "$@"; do
-  case "$_a" in SeedBase=*) SEEDBASE=${_a#SeedBase=} ;; esac
+  case "$_a" in Submitter=*) SUBMITTER=${_a#Submitter=} ;; esac
 done
-case "$SEEDBASE" in
-  ''|*[!0-9]*)
-    echo "FATAL: SeedBase missing or not an integer ('$SEEDBASE')."
-    echo "       Every CRAB task needs its own SeedBase, otherwise the"
-    echo "       same-numbered jobs of different tasks share an LHE seed and"
-    echo "       produce duplicate hard-process events."
-    echo "       Submit with submit_run3.sh, which allocates one per task."
-    echo "       Hand-written crabConfigs must set it themselves; check them"
-    echo "       with tools/check_seed_bases.py."
-    exit 65 ;;
-esac
-SEED=$(( SEEDBASE + NJOB ))
-echo "LHE seed: SeedBase=$SEEDBASE + ProcId=$NJOB -> $SEED"
+if [ -z "$SUBMITTER" ]; then
+  echo "FATAL: Submitter missing from scriptArgs."
+  echo "       The LHE seed is derived from it, and without it every task would"
+  echo "       reuse one series of seeds and generate duplicate events."
+  echo "       submit_run3.sh passes it; a hand-written crabConfig must add"
+  echo "       'Submitter=<your username>' to config.JobType.scriptArgs."
+  exit 65
+fi
+# md5 so the value is the same on any machine: a resubmitted job has to
+# regenerate the same events. 15 hex digits stay inside signed 64-bit.
+SEED_HEX=$(printf '%s|%s|%s|%s' "$SUBMITTER" "$DIR" "$OUTTAG" "$NJOB" \
+           | md5sum | cut -c1-15)
+SEED=$(( (0x$SEED_HEX % 900000000) + 1 ))
+echo "LHE seed: $SUBMITTER|$DIR|$OUTTAG|$NJOB -> $SEED"
 # ----------------------------------------------------------------------------
 
 # Where the finished NanoAOD is written. $DIR is appended to OUT_BASE, so

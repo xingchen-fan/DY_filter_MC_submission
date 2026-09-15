@@ -30,7 +30,7 @@ config.General.transferOutputs = True
 config.JobType.pluginName = 'PrivateMC'
 config.JobType.psetName = 'ConfigDY8.py'
 config.JobType.scriptExe  = 'job/2022postEEDY_keepmini.sh'
-config.JobType.scriptArgs = ['Nevents=10000', 'Tag=keepmini200', 'DIR=2022postEE', 'DEST=root://eosuser.cern.ch//eos/project/h/htozg-dy-privatemc/pelai/HZg/root_DYfilter/test_newfilter_mini/2022postEE', 'SeedBase=800000000']
+config.JobType.scriptArgs = ['Nevents=10000', 'Tag=keepmini200', 'DIR=2022postEE', 'DEST=root://eosuser.cern.ch//eos/project/h/htozg-dy-privatemc/pelai/HZg/root_DYfilter/test_newfilter_mini/2022postEE', 'Submitter=pelai']
 config.JobType.inputFiles = ['premix_lists/premix_ondisk_2022postEE.txt',
                              'FrameworkJobReport.xml',
                              'gen_filter/DYto2L-2Jets_MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8__Run3Summer22EE__fragment.py',
