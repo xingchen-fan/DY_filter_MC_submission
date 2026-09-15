@@ -103,27 +103,57 @@ esac
 # collisions, and resubmitting a task returns the SeedBase it already had
 # (idempotent). Plain text, so it can be read and audited by hand.
 SEED_REGISTRY=seed_registry.txt
+SEED_BLOCKS=seed_blocks.txt
+SEED_BLOCK_SIZE=10000000 # one block per submitter, 500 tasks each
 SEED_STRIDE=20000        # >= totalUnits (10000), with a factor of two to spare
-SEED_MAX=900000000       # hard limit of CMSSW's RandomNumberGeneratorService
-SEED_RESERVED=800000000  # above this line: hand-written / test tasks only
+SEED_RESERVED=800000000  # block 80 and up: hand-written / test configs only
 touch "$SEED_REGISTRY"
 
+# Which block this submitter owns. Failing here rather than guessing a block is
+# deliberate: a guessed block is the silent collision the scheme exists to stop.
+seed_block() {
+  local b
+  b=$(awk -v u="$USER" '$1 == u {print $2; exit}' "$SEED_BLOCKS" 2>/dev/null)
+  case "$b" in
+    ''|*[!0-9]*)
+      echo "ERROR: no seed block for '$USER' in $SEED_BLOCKS." >&2
+      echo "       Append a line '<username> <next free block>', then submit" >&2
+      echo "       again. Blocks in use:" >&2
+      awk '!/^#/ && NF==2 {printf "         %-12s %s\n", $1, $2}' "$SEED_BLOCKS" >&2
+      return 1 ;;
+  esac
+  [ "$b" -ge 1 ] && [ "$b" -lt 80 ] || {
+    echo "ERROR: block $b is out of range (1..79)." >&2; return 1; }
+  echo "$b"
+}
+
+# Allocate inside this submitter's block. Blocks do not overlap, so two people
+# submitting at the same moment from their own clones cannot collide, with no
+# pull and no shared file needed. The registry records what was issued.
 alloc_seedbase() {       # $1 = key, e.g. 2022postEE/p1_1
-  local key=$1 lock=.seed_registry.lock existing next tries=0
+  local key=$1 lock=.seed_registry.lock existing next lo hi blk tries=0
+  blk=$(seed_block) || return 1
+  lo=$((blk * SEED_BLOCK_SIZE))
+  hi=$((lo + SEED_BLOCK_SIZE))
   while ! mkdir "$lock" 2>/dev/null; do
     tries=$((tries + 1))
     [ $tries -gt 60 ] && { echo "ERROR: seed registry locked for over 60 s" >&2; return 1; }
     sleep 1
   done
-  existing=$(awk -v k="$key" '$2 == k {print $1; exit}' "$SEED_REGISTRY")
+  # Same key twice returns the same value, so resubmitting a task is safe.
+  # The key must be matched together with the submitter: <era>/<tag> is not
+  # unique between people, and matching on it alone hands the second person the
+  # first person's SeedBase -- which is the collision this is here to prevent.
+  existing=$(awk -v k="$key" -v u="$USER" '$2 == k && $3 == u {print $1; exit}' "$SEED_REGISTRY")
   if [ -n "$existing" ]; then rmdir "$lock"; echo "$existing"; return 0; fi
-  # Only values below the reserved line: otherwise a hand-written task's
-  # 800000000 would push the allocation point up with it.
-  next=$(awk -v lim=$SEED_RESERVED 'BEGIN{m=0} $1+0>0 && $1+0<lim {if ($1+0 > m) m=$1+0} END{print m}' "$SEED_REGISTRY")
+  # Only values inside this block matter; everyone else's are irrelevant here.
+  next=$(awk -v lo=$lo -v hi=$hi 'BEGIN{m=0} $1+0>=lo && $1+0<hi {if ($1+0 > m) m=$1+0} END{print m}' "$SEED_REGISTRY")
+  [ "$next" -eq 0 ] && next=$lo
   next=$((next + SEED_STRIDE))
-  if [ $((next + 10000)) -ge $SEED_RESERVED ]; then
-    rmdir "$lock"; echo "ERROR: seed space exhausted ($next)" >&2; return 1; fi
-  printf '%d %s %s\n' "$next" "$key" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$SEED_REGISTRY"
+  if [ $((next + 10000)) -ge $hi ]; then
+    rmdir "$lock"
+    echo "ERROR: block $blk is full ($next). Take a second block." >&2; return 1; fi
+  printf '%d %s %s %s\n' "$next" "$key" "$USER" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$SEED_REGISTRY"
   rmdir "$lock"; echo "$next"
 }
 # ----------------------------------------------------------------------------
