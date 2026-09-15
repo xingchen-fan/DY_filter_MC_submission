@@ -121,19 +121,13 @@ grep -E "Submitter|totalUnits|numCores|maxMemoryMB|requestName" \
 
 Expect your username in `Submitter`, your `totalUnits`, and the era's resources.
 
-Then check every config at once:
+`Submitter` is the one to look at. Without it every job of the task exits 65,
+on purpose — see section 5. `submit_run3.sh` always writes it, so on this path
+it is there; the grep is how you see it rather than assume it.
 
-```bash
-python3 tools/check_submitter.py
-```
-
-This must end with
-
-```
-OK: every hand-written config passes Submitter
-```
-
-A config without `Submitter` makes every one of its jobs exit 65.
+(There is a `tools/check_submitter.py` that scans every config at once. It is
+for hand-written configs, which is not what you are doing here, and it cannot
+fail for a config this script generated.)
 
 ---
 
