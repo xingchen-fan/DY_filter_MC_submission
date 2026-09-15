@@ -5,9 +5,11 @@
 #
 #   era         2022preEE | 2022postEE | 2023preBPix | 2023postBPix | 2024_2E | 2024_2Mu
 #   n_tasks     how many tasks; each is 10,000 jobs (CRAB's per-task limit)
-#   your_tag    goes into the request name and the output file names, so two
-#               people submitting the same era do not collide -- use your
-#               initials, e.g. pz
+#   your_tag    the production round, not your name: p1 for phase 1, p2 for
+#               phase 2, so a task comes out as p1_7. The output already lives
+#               under your own $USER directory, so two people cannot collide,
+#               and a tag that says which round a file belongs to is worth more
+#               later than one that says who submitted it.
 #   first_index start of the numbering (default 1); use it to continue a series
 #   --dest      output base. Defaults to YOUR OWN subdirectory of the shared
 #               project space, derived from $USER, so everybody contributes to

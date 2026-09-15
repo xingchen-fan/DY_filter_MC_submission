@@ -14,7 +14,7 @@ import os
 import shutil
 import sys
 
-# tools/ 在 Run3/ 底下一層, job/ 在上一層
+# tools/ sits one level below Run3/; job/ is one level up from here
 JOBDIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "job")
 

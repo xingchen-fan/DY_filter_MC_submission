@@ -98,13 +98,14 @@ the worker node.
 You should see, per task:
 
 ```
-  seed base 220000  (seeds 220001..230000)
+output base: root://eosuser.cern.ch//eos/project/h/htozg-dy-privatemc/<user>/HZg/root_DYfilter/phase1  (exists)
   totalUnits -> 10
 submitting crab_configs/crabConfig_2023preBPix_<tag>_1.py
-Task name: 2609xx_xxxxxx:<user>_crab_DY2023preBPix_<tag>_1
+Task name: <date>_<time>:<user>_crab_DY2023preBPix_<tag>_1
 ```
 
-That `seed base` line is the important one — see section 5.
+No seed is printed here, and none is chosen here — the payload derives it on
+the worker node. Section 5 says from what.
 
 ---
 
