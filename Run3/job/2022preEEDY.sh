@@ -72,7 +72,7 @@ DEST=${DEST%/}
 DEST="$DEST/$OUTTAG"
 # Optional 6th scriptArg KEEPAOD=<xrootd URL>: also stage out the AOD, for the
 # truth-matching study that needs the full gen record. Unset (the default) keeps
-# the old behaviour of deleting it, so nothing changes for normal production.
+# the old behavior of deleting it, so nothing changes for normal production.
 ARGKEEPAOD=$6
 KEEPAOD=${ARGKEEPAOD#*=}
 [ "$KEEPAOD" = "$ARGKEEPAOD" ] && KEEPAOD=""
@@ -104,9 +104,11 @@ use_release () {
 Fragment_filename=DYto2L-2Jets_MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8__Run3Summer22__fragment.py
 NANOAOD_NAME="DYto2L-2Jets_MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8__Run3Summer22NanoAODv12-130X_mcRun3_2022_realistic_v5-v5__privateProduction"
 
-# premix pileup 清單：透過 config.JobType.inputFiles 隨 job 送來，只會有一份。
-# 用 filelist: 而非 dbs:，可確保只讀「確定在 disk 上」的檔案 —— 直接用 dbs: 會讓
-# 全域 redirector 選到沒有複本的站點，job 在 DIGIPREMIX 以 FallbackFileOpenError 死掉。
+# The premix pileup list travels with the job through config.JobType.inputFiles,
+# so there is exactly one copy of it. Use filelist: rather than dbs:, which
+# restricts the job to files known to be on disk -- with dbs: the global
+# redirector can pick a site holding no replica, and the job dies in DIGIPREMIX
+# with FallbackFileOpenError.
 PREMIX_LIST=$(ls premix_ondisk_*.txt 2>/dev/null | head -1)
 if [ -z "$PREMIX_LIST" ]
 then

@@ -122,16 +122,18 @@ def summarize(files, label, do_match=True, max_files=10, max_events=2000):
 
     per_job = n_ev / float(len(files))
     print("  %s" % label)
-    print("    檔案 %d 個, 事件 %d, 平均 %.1f 事件/job" % (len(files), n_ev, per_job))
-    print("    filter 效率 %.2f%%" % (100.0 * per_job / NEVENTS_PER_JOB))
-    print("    平均檔案大小 %.2f MB, 每事件 %.1f kB"
+    print("    %d files, %d events, %.1f events/job on average"
+          % (len(files), n_ev, per_job))
+    print("    filter efficiency %.2f%%" % (100.0 * per_job / NEVENTS_PER_JOB))
+    print("    mean file size %.2f MB, %.1f kB per event"
           % (n_bytes / len(files) / 1e6, n_bytes / max(n_ev, 1) / 1e3))
     tot = sum(counts.values())
-    print("    status-1 GenPart 組成 (前 8 類, 共 %d):" % tot)
+    print("    status-1 GenPart composition (top 8 of %d):" % tot)
     for k, v in counts.most_common(8):
         print("      %-10s %8d  (%.1f%%)" % (k, v, 100.0 * v / max(tot, 1)))
     if near_pdg:
-        print("    reco photon 最近 status-1 gen 粒子 (%d 個 photon):" % n_pho)
+        print("    nearest status-1 gen particle to each reco photon (%d photons):"
+              % n_pho)
         for k, v in near_pdg.most_common(8):
             print("      %-28s %6d  (%.1f%%)" % (k, v, 100.0 * v / max(n_pho, 1)))
     return per_job
@@ -142,23 +144,23 @@ def main():
     old_glob = sys.argv[2] if len(sys.argv) > 2 else OLD_DEFAULT
 
     print("=" * 62)
-    print("新版 (新 filter + 新 keep 規則)")
+    print("new (new filter + new keep rules)")
     print("=" * 62)
     new_per_job = summarize(sorted(glob.glob(new_glob)), new_glob)
 
     print()
     print("=" * 62)
-    print("舊版 (對照)")
+    print("old (reference)")
     print("=" * 62)
     old_per_job = summarize(sorted(glob.glob(old_glob)), old_glob)
 
     if new_per_job and old_per_job:
         print()
         print("=" * 62)
-        print("結論")
+        print("conclusion")
         print("=" * 62)
-        print("  效率比 新/舊 = %.3f" % (new_per_job / old_per_job))
-        print("  => 相同統計量所需 job 數 = 原本的 %.2f 倍"
+        print("  efficiency ratio new/old = %.3f" % (new_per_job / old_per_job))
+        print("  => jobs needed for the same statistics = %.2f x the original"
               % (old_per_job / new_per_job))
 
 

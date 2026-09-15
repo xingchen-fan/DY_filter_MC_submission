@@ -16,14 +16,16 @@ Output: job/2022postEEDY_keepmini.sh
 import os
 import sys
 
-# tools/ 在 Run3/ 底下一層, job/ 在上一層
+# tools/ sits one level below Run3/; job/ is one level up from here
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(HERE, "job", "2022postEEDY.sh")
 DST = os.path.join(HERE, "job", "2022postEEDY_keepmini.sh")
 
 DROP_RM = 'rm -f $TAG"_"$NJOB"__MINIAOD.root"\n'
-KEEP_NOTE = ("# keepmini 版: 不刪 MiniAOD, 下面會一併 stage out, 用來做\n"
-             "# NanoAOD GenPart vs MiniAOD packedGenParticles 的同批事件對照。\n")
+KEEP_NOTE = (
+    "# keepmini variant: the MiniAOD is not deleted, it is staged out alongside the\n"
+    "# NanoAOD, so that GenPart and packedGenParticles can be compared on the same\n"
+    "# events.\n")
 
 ANCHOR = "rm -rf CMSSW_12_4_11_patch3 CMSSW_13_0_13\n"
 MINI_STAGEOUT = '''
@@ -66,11 +68,11 @@ def main():
 
     # verify
     checks = [
-        ("MiniAOD 不再被刪", DROP_RM not in text),
-        ("有 mini stage-out", "STAGEOUT-MINIAOD" in text),
-        ("mini 目錄會建立", "mkdir -p $DEST_PATH/mini" in text),
-        ("NanoAOD stage-out 仍在", "STAGEOUT Successful: $DEST/$OUTFILE" in text),
-        ("新 keep 規則仍在", text.count("keep status == 1 && pt > 0.5") == 2),
+        ("MiniAOD kept", DROP_RM not in text),
+        ("mini stage-out present", "STAGEOUT-MINIAOD" in text),
+        ("mini directory created", "mkdir -p $DEST_PATH/mini" in text),
+        ("NanoAOD stage-out intact", "STAGEOUT Successful: $DEST/$OUTFILE" in text),
+        ("new keep rules intact", text.count("keep status == 1 && pt > 0.5") == 2),
     ]
     ok = True
     for name, res in checks:

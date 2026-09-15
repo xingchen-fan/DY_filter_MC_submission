@@ -333,7 +333,7 @@ def main(a):
                  "%s/root_DYrealmix/%s/%s.root" % (BASE, DYMIX_DIR, a.era),
                  None, "photon_donor_index", ROOT.kBlack)]
         # ratio_of names the DENOMINATOR. Our constructed sample goes there so the
-        # ratio is DYcentral/ours and the points inherit the coloured curve.
+        # ratio is DYcentral/ours and the points inherit the colored curve.
         ratio_of = 1
         ratio_title = "cent. / DYmix"
     elif a.mode == "pileupsplit":
@@ -365,7 +365,7 @@ def main(a):
         # The two ingredients are DYcentral's OWN classes, not DYmix/DYfilter:
         # that is the mixture the KS fit was performed on.
         # kAzure+2 is what `classes` uses for Others -- the same class should
-        # not change colour between figures.
+        # not change color between figures.
         spec = [("DYcentral other #gamma",
                  "%s/root_DYcentral/DYcentral_other/%s.root" % (BASE, a.era),
                  None, None, ROOT.kAzure + 2),
@@ -440,7 +440,7 @@ def main(a):
                  _filt_cut,
                  None, ROOT.kBlack)]
         # ratio_of names the DENOMINATOR. Our constructed sample goes there so the
-        # ratio is DYcentral/ours and the points inherit the coloured curve.
+        # ratio is DYcentral/ours and the points inherit the colored curve.
         ratio_of = 1
         ratio_title = "cent. / DYfilter"
 

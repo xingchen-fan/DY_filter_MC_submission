@@ -96,9 +96,11 @@ use_release () {
 Fragment_filename=DYto2L-2Jets_MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8__Run3Summer22EE__fragment.py
 NANOAOD_NAME="DYto2L-2Jets_MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8__Run3Summer22EENanoAODv12-130X_mcRun3_2022_realistic_postEE_v6-v5__privateProduction"
 
-# premix pileup 清單：透過 config.JobType.inputFiles 隨 job 送來，只會有一份。
-# 用 filelist: 而非 dbs:，可確保只讀「確定在 disk 上」的檔案 —— 直接用 dbs: 會讓
-# 全域 redirector 選到沒有複本的站點，job 在 DIGIPREMIX 以 FallbackFileOpenError 死掉。
+# The premix pileup list travels with the job through config.JobType.inputFiles,
+# so there is exactly one copy of it. Use filelist: rather than dbs:, which
+# restricts the job to files known to be on disk -- with dbs: the global
+# redirector can pick a site holding no replica, and the job dies in DIGIPREMIX
+# with FallbackFileOpenError.
 PREMIX_LIST=$(ls premix_ondisk_*.txt 2>/dev/null | head -1)
 if [ -z "$PREMIX_LIST" ]
 then
@@ -220,8 +222,9 @@ rm -f $TAG"_"$NJOB"__GS.root"
 rm -f *inLHE.root
 rm -f $TAG"_"$NJOB"__DIGIPREMIX.root"
 rm -f $TAG"_"$NJOB"__AOD.root"
-# keepmini 版: 不刪 MiniAOD, 下面會一併 stage out, 用來做
-# NanoAOD GenPart vs MiniAOD packedGenParticles 的同批事件對照。
+# keepmini variant: the MiniAOD is not deleted, it is staged out alongside the
+# NanoAOD, so that GenPart and packedGenParticles can be compared on the same
+# events.
 
 echo ---------------------------STAGEOUT-------------------------
 OUTFILE=$NANOAOD_NAME"__job-"$NJOB"_"$OUTTAG".root"

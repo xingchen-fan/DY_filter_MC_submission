@@ -219,9 +219,9 @@ appearing, because the jobs stage out themselves rather than through CRAB.
 ## Monitor
 
 ```bash
-crab status -d crab_projects/crab_DY2022postEE_pz_1
-crab resubmit -d crab_projects/crab_DY2022postEE_pz_1   # retry failed jobs
-crab kill     -d crab_projects/crab_DY2022postEE_pz_1
+crab status -d crab_projects/crab_DY2022postEE_p1_1
+crab resubmit -d crab_projects/crab_DY2022postEE_p1_1   # retry failed jobs
+crab kill     -d crab_projects/crab_DY2022postEE_p1_1
 ```
 
 Output goes to

@@ -1,3 +1,9 @@
+# HISTORICAL RECORD -- nothing reads or writes this file any more.
+# Seeds were allocated from here until 2026-09-14. They are now derived in the
+# payload from Submitter, era, tag and ProcId, so there is nothing to reserve
+# and nothing to keep in step. Kept only so a task submitted before that date
+# can still be traced to the seeds it used. Do not add lines to it.
+#
 # Reserved block for hand-written / test tasks (not allocated by submit_run3.sh)
 800000000 2022postEE/keepmini200 2026-09-13T18:35:40Z
 800020000 2022postEE/keepmini200b 2026-09-13T18:35:40Z
