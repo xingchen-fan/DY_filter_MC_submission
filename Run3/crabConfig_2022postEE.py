@@ -30,18 +30,23 @@ config.Data.outputPrimaryDataset = 'ShellTest'
 config.Data.publication = True
 config.Data.outputDatasetTag = 'test'
 
-# Run anywhere the pool will take us, not only where the premix library has a
-# replica. Until 2026-09-16 this was Site.whitelist = ['T2_CH_CERN',
-# 'T1_US_FNAL'], which in practice meant CERN alone: FNAL never appears in the
-# site list CRAB derives for a generation task, so every job of every era ran
-# at T2_CH_CERN. With thirteen people submitting one fold, one site is the
-# ceiling, and 8,884 of our jobs sat idle there while 131 ran.
+# Run beyond CERN, not only where the premix library has a replica. Until
+# 2026-09-16 this was the whitelist below WITHOUT ignoreLocality, which in
+# practice meant CERN alone: FNAL never appears in the site list CRAB derives
+# for a generation task, so every job of every era ran at T2_CH_CERN. With
+# thirteen people submitting one fold, one site is the ceiling -- 8,884 of our
+# jobs sat idle there while 131 ran.
 #
-# ignoreLocality stops CRAB deriving sites from where data lives -- there is no
-# input dataset here, only an invented block -- and lets the job match anywhere.
-# Measured on 10 jobs at T2_US_MIT and T2_US_UCSD, neither of which holds
-# premix: 10/10 exited 0, runtime 1h16-1h35 against 44 min at CERN, because the
-# premix is read over the WAN.
+# ignoreLocality stops CRAB deriving sites from where data lives (there is no
+# input dataset here, only an invented block) and lets the job overflow past
+# the whitelist. The whitelist still has to be here: CRAB refuses the config
+# without one when ignoreLocality is set. It is kept at the two sites that
+# actually hold premix, so that if the overflow ever stops happening the jobs
+# fall back to where reading is local rather than to nowhere.
+#
+# Measured on 10 jobs that overflowed to T2_US_MIT and T2_US_UCSD, neither of
+# which holds premix: 10/10 exited 0, runtime 1h16-1h35 against 44 min at CERN,
+# the difference being premix read over the WAN.
 #
 # 🔴 One of those ten produced a file with 7 events instead of ~300, and still
 # exited 0. Nothing downstream notices that: the job succeeds, the file exists,
@@ -49,4 +54,5 @@ config.Data.outputDatasetTag = 'test'
 # tools/check_event_counts.py over the output before merging -- see TUTORIAL
 # section 7.
 config.Data.ignoreLocality = True
+config.Site.whitelist = ['T2_CH_CERN', 'T1_US_FNAL']
 config.Site.storageSite = 'T3_CH_CERNBOX'
