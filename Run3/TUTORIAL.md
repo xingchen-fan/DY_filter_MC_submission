@@ -402,6 +402,35 @@ way to tell which file came from which.
 
 ## 10. When something goes wrong
 
+Start here, from the `Run3` directory and inside the section 2 environment:
+
+```bash
+./recover.sh 2024_2E fold1            # report only
+./recover.sh 2024_2E fold1 --apply    # act
+```
+
+It handles the two failures separately, because they need opposite treatment.
+
+**Jobs CRAB reports as failed** are retried with `crab resubmit`. The seed is
+derived from your username, the era, the tag and the ProcId, so a retry
+regenerates the same events rather than new ones: nothing is lost by retrying,
+and nothing is gained by retrying twice.
+
+**Jobs that exited 0 and wrote almost nothing** cannot be retried at all:
+
+```
+Only jobs in status failed can be resubmitted.
+```
+
+CRAB considers them finished, and it is right that they finished -- they just
+finished wrong. So `recover.sh` deletes those files and tells you how many jobs
+of output are missing. Produce that many under a **new tag**; a new tag is a new
+seed, so the replacement events differ from the ones lost, which is what you
+want. Never re-use the original tag to top up: two productions in one directory
+cannot be told apart afterwards.
+
+
+
 | symptom | first thing to check |
 |---|---|
 | jobs `failed`, exit code 65 | `Submitter` missing from the config — `grep Submitter crab_configs/<config>` |
