@@ -5,8 +5,8 @@
 #
 #   era         2022preEE | 2022postEE | 2023preBPix | 2023postBPix | 2024_2E | 2024_2Mu
 #   n_tasks     how many tasks; each is 10,000 jobs (CRAB's per-task limit)
-#   your_tag    the production round, not your name: p1 for phase 1, p2 for
-#               phase 2, so a task comes out as p1_7. The output already lives
+#   your_tag    the production, not your name: fold1 for the first fold, fold2
+#               for the second, so a task comes out as fold1_7. The output already lives
 #               under your own $USER directory, so two people cannot collide,
 #               and a tag that says which round a file belongs to is worth more
 #               later than one that says who submitted it.

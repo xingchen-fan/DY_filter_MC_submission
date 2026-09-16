@@ -129,8 +129,8 @@ You need a grid certificate installed first:
 
 * `era` — `2022preEE` | `2022postEE` | `2023preBPix` | `2023postBPix` | `2024_2E` | `2024_2Mu`
 * `n_tasks` — each task is 10,000 jobs (CRAB's per-task limit)
-* `your_tag` — the production round, not your name. Use `p1` for phase 1, `p2`
-  for phase 2, and so on; a task then comes out as `p1_7`. The output already
+* `your_tag` — the production, not your name. Use `fold1` for the first fold,
+  `fold2` for the second; a task then comes out as `fold1_7`. The output already
   lives under your own `$USER` directory, so two people cannot collide, and a
   tag that says which round the files belong to is far more useful later than
   one that says who submitted them.
@@ -143,7 +143,7 @@ You need a grid certificate installed first:
 Example — 3 tasks (30,000 jobs) of 2022postEE:
 
 ```bash
-./submit_run3.sh 2022postEE 3 p1
+./submit_run3.sh 2022postEE 3 fold1
 ```
 
 ### Where the output goes
@@ -229,9 +229,9 @@ appearing, because the jobs stage out themselves rather than through CRAB.
 ## Monitor
 
 ```bash
-crab status -d crab_projects/crab_DY2022postEE_p1_1
-crab resubmit -d crab_projects/crab_DY2022postEE_p1_1   # retry failed jobs
-crab kill     -d crab_projects/crab_DY2022postEE_p1_1
+crab status -d crab_projects/crab_DY2022postEE_fold1_1
+crab resubmit -d crab_projects/crab_DY2022postEE_fold1_1   # retry failed jobs
+crab kill     -d crab_projects/crab_DY2022postEE_fold1_1
 ```
 
 Output goes to
@@ -294,7 +294,16 @@ Two things that are easy to break:
 * **Premix must be given as `filelist:`, not `dbs:`.** With `dbs:` the global
   redirector picks sites that hold no replica and the DIGI step dies with
   `FallbackFileOpenError` (measured 33% failure). The lists here are the
-  on-disk subsets, and the configs whitelist `T2_CH_CERN` and `T1_US_FNAL`.
+  on-disk subsets.
+* **Jobs run anywhere, and read premix over the WAN when they have to.** The
+  configs set `Data.ignoreLocality = True` and carry no site whitelist. Until
+  2026-09-16 they whitelisted `T2_CH_CERN` and `T1_US_FNAL`, which meant CERN
+  alone -- FNAL is never in the site list CRAB derives for a generation task --
+  and one site is not enough for thirteen people sharing a fold. Jobs at a site
+  with no premix replica take about twice as long, and one in ten of a ten-job
+  sample wrote 7 events instead of ~300 while still exiting 0. Run
+  `tools/check_event_counts.py` over the output before merging; nothing else
+  detects that.
 
 Method and production notes: `doc/HZgamma/extended_dy_method.md` and
 `doc/HZgamma/extended_dy_job_log.md`. Run 2 scripts are in `../Run2` for
