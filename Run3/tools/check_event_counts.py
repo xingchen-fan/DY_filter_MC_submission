@@ -42,7 +42,7 @@ def files_under(root):
     return sorted(out)
 
 
-def main(root, min_frac, sample, quiet):
+def main(root, min_frac, sample, quiet, list_bad=False):
     paths = files_under(root)
     if not paths:
         print("no .root files under %s" % root)
@@ -68,6 +68,11 @@ def main(root, min_frac, sample, quiet):
     floor = max(1, int(median * min_frac))
     stunted = [(c, p) for c, p in counts if c < floor]
 
+    if list_bad:
+        for _, p in sorted(stunted):
+            print(p)
+        return 1 if stunted else 0
+
     print("%d files, median %d events, range %d-%d"
           % (len(counts), median, ordered[0], ordered[-1]))
     print("threshold: %d events (%.0f%% of the median)" % (floor, 100 * min_frac))
@@ -78,7 +83,9 @@ def main(root, min_frac, sample, quiet):
               % len(stunted))
         for c, p in sorted(stunted):
             print("  %6d events  %s" % (c, os.path.basename(p)))
-        print("\nRemove them before merging, and resubmit those job ids.")
+        print("\nThese cannot be retried: CRAB answers \"Only jobs in status"
+              " failed can be resubmitted\".\nDelete them and produce the"
+              " missing count under a new tag -- see recover.sh.")
     elif not quiet:
         print("OK: no stunted files")
     return 1 if (stunted or unreadable) else 0
@@ -92,5 +99,8 @@ if __name__ == "__main__":
     ap.add_argument("--sample", type=int, default=0,
                     help="check only this many files, spread evenly; 0 = all")
     ap.add_argument("--quiet", action="store_true")
+    ap.add_argument("--list-bad", action="store_true",
+                    help="print only the paths of stunted files, one per line, "
+                         "for a script to consume")
     a = ap.parse_args()
-    sys.exit(main(a.dir, a.min_frac, a.sample, a.quiet))
+    sys.exit(main(a.dir, a.min_frac, a.sample, a.quiet, a.list_bad))
