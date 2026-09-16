@@ -82,21 +82,30 @@ the worker node.
 
 ## 3. Your first submission is 10 jobs, not 10,000
 
-`submit_run3.sh` defaults to 10,000 jobs per task. For a first run, override it:
+`submit_run3.sh` defaults to 10,000 jobs per task. For a first run, override it.
+One of these, for the era you are producing:
 
 ```bash
-./submit_run3.sh --units 10 2023preBPix 1 p1 1
+./submit_run3.sh --units 10 2022preEE    1 test 1
+./submit_run3.sh --units 10 2022postEE   1 test 1
+./submit_run3.sh --units 10 2023preBPix  1 test 1
+./submit_run3.sh --units 10 2023postBPix 1 test 1
+./submit_run3.sh --units 10 2024_2E      1 test 1
+./submit_run3.sh --units 10 2024_2Mu     1 test 1
 ```
 
+The arguments, taking the 2023preBPix line apart:
+
 * `--units 10` — 10 jobs instead of 10,000
-* `2023preBPix` — the era; one of
-  `2022preEE` `2022postEE` `2023preBPix` `2023postBPix` `2024_2E` `2024_2Mu`
+* `2023preBPix` — the era, one of the six above. Section 8 pairs each with the
+  full-fold command
 * `1` — number of tasks
 * `<tag>` — the production round, not your name. Use `p1` for phase 1, `p2`
   for phase 2, and so on; a task then comes out as `p1_7`. The output already
   lives under your own `$USER` directory, so two people cannot collide, and a
   tag that says which round the files belong to is far more useful later than
-  one that says who submitted them.
+  one that says who submitted them. A trial run is not a round, so give it
+  `test` and leave `p1_1` for the production that follows
 * `1` — first index; the task is named `<tag>_1`
 
 You should see, per task:
@@ -218,19 +227,82 @@ means nothing.
 
 ---
 
-## 8. Scale up
+## 8. Scale up — the command for every era
 
-Only after the small run has landed output and passed section 7:
+Only after the small run has landed output and passed section 7, and one era
+at a time. Section 9 says why that last part is not a preference.
+
+Try ten jobs first, then the era. Both commands, per era:
+
+| era | trial (10 jobs) | one full fold |
+|---|---|---|
+| `2022preEE` | `./submit_run3.sh --units 10 2022preEE 1 test 1` | **7 tasks**, 68,000 jobs |
+| `2022postEE` | `./submit_run3.sh --units 10 2022postEE 1 test 1` | **22 tasks**, 219,000 jobs |
+| `2023preBPix` | `./submit_run3.sh --units 10 2023preBPix 1 test 1` | **8 tasks**, 75,000 jobs |
+| `2023postBPix` | `./submit_run3.sh --units 10 2023postBPix 1 test 1` | **5 tasks**, 50,000 jobs |
+| `2024_2E` | `./submit_run3.sh --units 10 2024_2E 1 test 1` | **36 tasks**, 353,500 jobs † |
+| `2024_2Mu` | `./submit_run3.sh --units 10 2024_2Mu 1 test 1` | **36 tasks**, 353,500 jobs † |
+
+A fold is not one command. Send about **8 tasks at a time** and add the next
+batch when the previous one has mostly landed — `first_index` is what continues
+the numbering, and reusing an index would write a second production into the
+first one's directory:
 
 ```bash
-./submit_run3.sh 2023preBPix 8 p1 2
+# 2022preEE -- 7 tasks
+./submit_run3.sh 2022preEE     7  p1 1    # p1_1 .. p1_7
+
+# 2022postEE -- 22 tasks, 3 batches
+./submit_run3.sh 2022postEE    8  p1 1    # p1_1 .. p1_8
+./submit_run3.sh 2022postEE    8  p1 9    # p1_9 .. p1_16
+./submit_run3.sh 2022postEE    6  p1 17   # p1_17 .. p1_22
+
+# 2023preBPix -- 8 tasks
+./submit_run3.sh 2023preBPix   8  p1 1    # p1_1 .. p1_8
+
+# 2023postBPix -- 5 tasks
+./submit_run3.sh 2023postBPix  5  p1 1    # p1_1 .. p1_5
+
+# 2024_2E -- 36 tasks, 5 batches
+./submit_run3.sh 2024_2E       8  p1 1    # p1_1 .. p1_8
+./submit_run3.sh 2024_2E       8  p1 9    # p1_9 .. p1_16
+./submit_run3.sh 2024_2E       8  p1 17   # p1_17 .. p1_24
+./submit_run3.sh 2024_2E       8  p1 25   # p1_25 .. p1_32
+./submit_run3.sh 2024_2E       4  p1 33   # p1_33 .. p1_36
+
+# 2024_2Mu -- 36 tasks, 5 batches
+./submit_run3.sh 2024_2Mu      8  p1 1    # p1_1 .. p1_8
+./submit_run3.sh 2024_2Mu      8  p1 9    # p1_9 .. p1_16
+./submit_run3.sh 2024_2Mu      8  p1 17   # p1_17 .. p1_24
+./submit_run3.sh 2024_2Mu      8  p1 25   # p1_25 .. p1_32
+./submit_run3.sh 2024_2Mu      4  p1 33   # p1_33 .. p1_36
 ```
 
-8 tasks of 10,000 jobs, numbered `<tag>_2 ... <tag>_9`.
+Eight is not a magic number, it is roughly what the queue absorbs: a task puts
+only about 1,000 of its jobs into the global pool at a time, so eight tasks
+already keep ~8,000 jobs queued. Measured on 2023preBPix, that queue delivered
+about 60 finished jobs an hour, so a batch of eight is days of work, not hours.
+Sending the next batch early does not make the first one faster — section 9.
 
-`README.md` has the job counts each era needs. Do not derive them from the
-gen-filter efficiency ratio — see the `1.06x` section there for why that
-overestimates by a factor of three.
+† **2024 is one fold split in two, and the number itself is unmeasured.**
+README's 707,000 is the total for 2024, not the figure for each flavor: every
+row of that table is the same rule, five jobs per baseline event, and 2024's
+input to it is an inclusive count like every other row. Splitting by lepton
+flavor changes who generates the events, not how many are needed -- a
+`2024_2E` job makes only ee, but makes it at roughly twice the rate an
+inclusive job does -- so the two flavors take about half of the 707,000 each.
+Roughly: ee and mumu do not contribute equally to the baseline.
+
+The 707,000 is also the one number in the table that has never been checked
+against a real job. It assumes 2024 yields what the other eras yield, and 2024
+is known to be less efficient -- by how much is unclear, since README quotes
+both 1.45% and ~2.5% for the same filter. Run the trial, count the baseline
+events it actually yields, and derive the task count from that. Do not scale
+the gen-filter efficiency: that is what overestimated 2022postEE by a factor
+of three.
+
+The other numbers come from `README.md`, which also explains the `1.06x` the
+new filter costs. Do not re-derive any of them from the gen-filter efficiency.
 
 ---
 

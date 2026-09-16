@@ -201,11 +201,21 @@ one fold of statistics needs:
 One job ≈ one output file, and one task = 10,000 jobs, so e.g. 2022EE needs
 about 22 tasks for a full fold.
 
-⚠️ **2024 counts double.** It is split by lepton flavor at the LHE level, so
-`2024_2E` and `2024_2Mu` are separate productions and the 707,000 above applies
-to each — 1,414,000 jobs for a full fold of 2024. (Its gen-filter efficiency is
-also only ~2.5%, a quarter of the other eras, so a 2024 job yields ~255 events
-instead of ~970.)
+⚠️ **2024's 707,000 is the total, not the number for each flavor.** Every row
+of the table is the same rule -- five jobs per baseline event -- and 2024's
+141,000 is an inclusive count like the others. Splitting the production by
+lepton flavor changes who generates those events, not how many are needed: a
+`2024_2E` job makes only ee, but makes it at roughly twice the rate an
+inclusive job does, so `2024_2E` and `2024_2Mu` take about half of the 707,000
+each, or ~36 tasks apiece. Roughly, because ee and mumu do not contribute
+equally to the baseline.
+
+⚠️ **The 707,000 itself has never been checked against a real job.** The rule
+that produced it assumes 2024 yields per job what the other eras yield. 2024's
+gen-filter efficiency is lower, which pushes the number up -- by how much is
+unclear, because this file quotes both 1.45% (145 events/job, the table near
+the top) and ~2.5% (255 events/job) for the same filter. One of those is
+wrong. Measure it on a trial before sending a fold.
 
 **Do not submit a whole fold at once.** Finish one era at a time; flooding the
 queue costs everyone their grid priority.
