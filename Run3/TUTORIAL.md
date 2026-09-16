@@ -18,7 +18,10 @@ Nothing below works without it, and the failure it gives is not obvious.
 
 You also need write access to wherever the output goes. The default is your own
 subdirectory of the shared project space, so you are not writing into anybody
-else's area.
+else's area -- but you still have to be in the e-group that can write to that
+project at all: **`cernbox-project-htozg-dy-privatemc-writers`**. Ask to be
+added before you start; `submit_run3.sh` stops with this same name if you are
+not, but only after you have set everything else up.
 
 ---
 
@@ -100,12 +103,12 @@ The arguments, taking the 2023preBPix line apart:
 * `2023preBPix` — the era, one of the six above. Section 8 pairs each with the
   full-fold command
 * `1` — number of tasks
-* `<tag>` — the production round, not your name. Use `p1` for phase 1, `p2`
-  for phase 2, and so on; a task then comes out as `p1_7`. The output already
-  lives under your own `$USER` directory, so two people cannot collide, and a
-  tag that says which round the files belong to is far more useful later than
-  one that says who submitted them. A trial run is not a round, so give it
-  `test` and leave `p1_1` for the production that follows
+* `test` — the tag. It names the production, not the person: `fold1` for the
+  first fold, `fold2` for the second. A task then comes out as `fold1_7`. The
+  output already lives under your own `$USER` directory, so two people cannot
+  collide, and a tag that says which production a file belongs to is worth far
+  more later than one that says who submitted it. A trial run is not a fold, so
+  give it `test` and leave `fold1_1` for the production that follows
 * `1` — first index; the task is named `<tag>_1`
 
 You should see, per task:
@@ -147,8 +150,14 @@ fail for a config this script generated.)
 ## 5. Where the seed comes from, and why it matters
 
 Each job seeds the LHE generator with a hash of four things: who submitted, the
-era, the tag, and the job's ProcId. Change any one of them and the events
-change.
+era directory, the tag, and the job's ProcId. Change any one of them and the
+events change.
+
+"Era directory" rather than era, because `2024_2E` and `2024_2Mu` both pass
+`DIR=2024`. One person submitting both with the same tag and index would get
+the same seed for the two of them -- different generator fragments, so not the
+same events, but not independent draws either. Give the two flavors different
+tags or different index ranges if one person runs both.
 
 The job index alone is not enough, and this is not hypothetical. Until
 2026-09-13 the payload used `initialSeed = ProcId`, and since every task runs
@@ -201,8 +210,12 @@ efficiency, which is what you want when deciding resources.
 Jobs reporting success is not the same as output being correct.
 
 ```bash
-ls <DEST>/2023preBPix/<tag>_1/ | wc -l      # one file per finished job
+eos root://eosuser.cern.ch ls <DEST>/2023preBPix/<tag>_1 | wc -l   # one file per finished job
 ```
+
+Use `eos ls`, not `ls` or `find`. A full task writes 10,000 files into that
+directory, and the EOS FUSE mount stops listing long before that -- it returns
+nothing and no error, which reads exactly like "no output was produced".
 
 Once at least two tasks of the same era have output, check that they are really
 independent:
@@ -211,13 +224,39 @@ independent:
 python3 tools/check_seed_uniqueness.py --dir <DEST>/2023preBPix
 ```
 
+Run it inside the environment from section 2: it needs `uproot`, which the
+CMSSW release has and the system `python3` on lxplus does not.
+
 It compares `Generator_x1` — the hard-process momentum fraction — as a multiset
-between same-numbered jobs of different tasks. Independent jobs overlap by 0.0%;
-a shared seed shows up as roughly 40%. It must end with
+between same-numbered jobs of different tasks. A shared seed shows up as roughly
+40%. Independent jobs are not exactly 0 but close to it: measured between real
+tasks of this production, 0.0% to 1.0%, which is why the threshold is 5%. It
+must end with
 
 ```
 OK: no shared seeds across tasks
 ```
+
+Then check that no job succeeded while producing almost nothing:
+
+```bash
+python3 tools/check_event_counts.py --dir <DEST>/2023preBPix/<tag>_1
+```
+
+Jobs now run wherever the pool places them, including sites that hold no copy
+of the premix library and read it over the WAN. Those work -- 10 of 10 exited 0
+in the batch that was measured -- but one of the ten wrote **7 events instead
+of about 300 and still exited 0**. CRAB reports it finished, the file is there,
+the size is within a factor of two of a good one, and the tree opens. The event
+count is the only thing that is wrong, so it is the only thing that finds it.
+This must end with
+
+```
+OK: no stunted files
+```
+
+and anything it lists has to be deleted and its job id resubmitted before the
+output is merged.
 
 **Do not substitute `run:lumi:event` for this.** Every job numbers its events in
 the same `1..N` range, so 40 jobs of a *single* task already share 43.5% of
@@ -236,11 +275,14 @@ at a time. Section 9 says why that last part is not a preference.
 surviving the analysis baseline selection match what the existing central DY
 sample already has. One fold doubles the DY statistics.
 
-The budget is **five jobs per baseline event** — a job generates 10,000 events
-and about 0.2 of one (20%) is still standing after baseline. So every job count
-below is 5x the era's "existing events after baseline" column in `README.md`,
-and one fifth of a fold is the point where you have produced one job per event
-you are trying to match.
+The budget is **five jobs for one usable event**. A job generates 10,000 events;
+the generator filter keeps a few hundred of them, and of those, on average one
+event per five jobs is still standing after the analysis baseline selection. So
+an era's job count is five times its "existing events after baseline" column in
+`README.md`: that column is the target, and five jobs buy one event of it.
+
+That ratio is where the old progress reports came from — a fold quoted at 20%
+meant one job submitted for every event being matched.
 
 Try ten jobs first, then the era. Both commands, per era:
 
@@ -264,39 +306,39 @@ merged into one place.
 
 ```bash
 # 2022preEE -- 7 tasks
-./submit_run3.sh 2022preEE     7  p1 1    # p1_1 .. p1_7    Jookang
+./submit_run3.sh 2022preEE     7  fold1 1    # fold1_1 .. fold1_7    Jookang
 
 # 2022postEE -- 22 tasks
-./submit_run3.sh 2022postEE    6  p1 1    # p1_1 .. p1_6    Junhyeok  (1 of 2)
-./submit_run3.sh 2022postEE    5  p1 7    # p1_7 .. p1_11   Junhyeok  (2 of 2)
-./submit_run3.sh 2022postEE    6  p1 12   # p1_12 .. p1_17  Junwon  (1 of 2)
-./submit_run3.sh 2022postEE    5  p1 18   # p1_18 .. p1_22  Junwon  (2 of 2)
+./submit_run3.sh 2022postEE    6  fold1 1    # fold1_1 .. fold1_6    Junhyeok Song  (1 of 2)
+./submit_run3.sh 2022postEE    5  fold1 7    # fold1_7 .. fold1_11   Junhyeok Song  (2 of 2)
+./submit_run3.sh 2022postEE    6  fold1 12   # fold1_12 .. fold1_17  Junwon  (1 of 2)
+./submit_run3.sh 2022postEE    5  fold1 18   # fold1_18 .. fold1_22  Junwon  (2 of 2)
 
 # 2023preBPix -- 8 tasks
-./submit_run3.sh 2023preBPix   8  p1 1    # p1_1 .. p1_8    Joseph
+./submit_run3.sh 2023preBPix   8  fold1 1    # fold1_1 .. fold1_8    Joseph
 
 # 2023postBPix -- 5 tasks
-./submit_run3.sh 2023postBPix  5  p1 1    # p1_1 .. p1_5    Peike
+./submit_run3.sh 2023postBPix  5  fold1 1    # fold1_1 .. fold1_5    Peike
 
 # 2024_2E -- 36 tasks
-./submit_run3.sh 2024_2E       5  p1 1    # p1_1 .. p1_5    Pei-Zhu  (1 of 2)
-./submit_run3.sh 2024_2E       4  p1 6    # p1_6 .. p1_9    Pei-Zhu  (2 of 2)
-./submit_run3.sh 2024_2E       5  p1 10   # p1_10 .. p1_14  Amrutha  (1 of 2)
-./submit_run3.sh 2024_2E       4  p1 15   # p1_15 .. p1_18  Amrutha  (2 of 2)
-./submit_run3.sh 2024_2E       5  p1 19   # p1_19 .. p1_23  Mingxu  (1 of 2)
-./submit_run3.sh 2024_2E       4  p1 24   # p1_24 .. p1_27  Mingxu  (2 of 2)
-./submit_run3.sh 2024_2E       5  p1 28   # p1_28 .. p1_32  Mingtao  (1 of 2)
-./submit_run3.sh 2024_2E       4  p1 33   # p1_33 .. p1_36  Mingtao  (2 of 2)
+./submit_run3.sh 2024_2E       5  fold1 1    # fold1_1 .. fold1_5    Pei-Zhu  (1 of 2)
+./submit_run3.sh 2024_2E       4  fold1 6    # fold1_6 .. fold1_9    Pei-Zhu  (2 of 2)
+./submit_run3.sh 2024_2E       5  fold1 10   # fold1_10 .. fold1_14  Amrutha  (1 of 2)
+./submit_run3.sh 2024_2E       4  fold1 15   # fold1_15 .. fold1_18  Amrutha  (2 of 2)
+./submit_run3.sh 2024_2E       5  fold1 19   # fold1_19 .. fold1_23  Mingxu  (1 of 2)
+./submit_run3.sh 2024_2E       4  fold1 24   # fold1_24 .. fold1_27  Mingxu  (2 of 2)
+./submit_run3.sh 2024_2E       5  fold1 28   # fold1_28 .. fold1_32  Mingtao  (1 of 2)
+./submit_run3.sh 2024_2E       4  fold1 33   # fold1_33 .. fold1_36  Mingtao  (2 of 2)
 
 # 2024_2Mu -- 36 tasks
-./submit_run3.sh 2024_2Mu      5  p1 1    # p1_1 .. p1_5    Yue Pan  (1 of 2)
-./submit_run3.sh 2024_2Mu      4  p1 6    # p1_6 .. p1_9    Yue Pan  (2 of 2)
-./submit_run3.sh 2024_2Mu      5  p1 10   # p1_10 .. p1_14  Junhyuk Lee  (1 of 2)
-./submit_run3.sh 2024_2Mu      4  p1 15   # p1_15 .. p1_18  Junhyuk Lee  (2 of 2)
-./submit_run3.sh 2024_2Mu      5  p1 19   # p1_19 .. p1_23  Xingchen  (1 of 2)
-./submit_run3.sh 2024_2Mu      4  p1 24   # p1_24 .. p1_27  Xingchen  (2 of 2)
-./submit_run3.sh 2024_2Mu      5  p1 28   # p1_28 .. p1_32  Sungbeom  (1 of 2)
-./submit_run3.sh 2024_2Mu      4  p1 33   # p1_33 .. p1_36  Sungbeom  (2 of 2)
+./submit_run3.sh 2024_2Mu      5  fold1 1    # fold1_1 .. fold1_5    Yue Pan  (1 of 2)
+./submit_run3.sh 2024_2Mu      4  fold1 6    # fold1_6 .. fold1_9    Yue Pan  (2 of 2)
+./submit_run3.sh 2024_2Mu      5  fold1 10   # fold1_10 .. fold1_14  Junhyuk Lee  (1 of 2)
+./submit_run3.sh 2024_2Mu      4  fold1 15   # fold1_15 .. fold1_18  Junhyuk Lee  (2 of 2)
+./submit_run3.sh 2024_2Mu      5  fold1 19   # fold1_19 .. fold1_23  Xingchen  (1 of 2)
+./submit_run3.sh 2024_2Mu      4  fold1 24   # fold1_24 .. fold1_27  Xingchen  (2 of 2)
+./submit_run3.sh 2024_2Mu      5  fold1 28   # fold1_28 .. fold1_32  Sungbeom  (1 of 2)
+./submit_run3.sh 2024_2Mu      4  fold1 33   # fold1_33 .. fold1_36  Sungbeom  (2 of 2)
 ```
 
 What that adds up to:
@@ -313,8 +355,11 @@ What that adds up to:
 Thirteen people, 5 to 11 tasks each. **Nobody appears under two eras**, and that
 is deliberate: grid priority is charged per user, so a person split across two
 eras divides their own share between them and finishes neither sooner. It is
-also why the shares cannot be made perfectly equal -- the eras come in sizes of
-5, 7, 8, 22, 36, 36, and a person has to fit inside one of them.
+also why the shares cannot be made equal -- the eras come in sizes of 5, 7, 8,
+22, 36 and 36, and a person has to fit inside one of them.
+
+Junhyeok Song and Junhyuk Lee are two people, on two different eras. Both are
+written with a surname for that reason; do not collapse them into one.
 
 Where somebody's share is more than 8 tasks it is written as two lines, because
 one person should not have more than about 8 tasks queued at once. **Send the

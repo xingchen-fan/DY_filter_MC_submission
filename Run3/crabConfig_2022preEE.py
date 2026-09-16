@@ -30,5 +30,23 @@ config.Data.outputPrimaryDataset = 'ShellTest'
 config.Data.publication = True
 config.Data.outputDatasetTag = 'test'
 
-config.Site.whitelist = ['T2_CH_CERN', 'T1_US_FNAL']
+# Run anywhere the pool will take us, not only where the premix library has a
+# replica. Until 2026-09-16 this was Site.whitelist = ['T2_CH_CERN',
+# 'T1_US_FNAL'], which in practice meant CERN alone: FNAL never appears in the
+# site list CRAB derives for a generation task, so every job of every era ran
+# at T2_CH_CERN. With thirteen people submitting one fold, one site is the
+# ceiling, and 8,884 of our jobs sat idle there while 131 ran.
+#
+# ignoreLocality stops CRAB deriving sites from where data lives -- there is no
+# input dataset here, only an invented block -- and lets the job match anywhere.
+# Measured on 10 jobs at T2_US_MIT and T2_US_UCSD, neither of which holds
+# premix: 10/10 exited 0, runtime 1h16-1h35 against 44 min at CERN, because the
+# premix is read over the WAN.
+#
+# 🔴 One of those ten produced a file with 7 events instead of ~300, and still
+# exited 0. Nothing downstream notices that: the job succeeds, the file exists,
+# the size looks plausible. Only the event count shows it. Run
+# tools/check_event_counts.py over the output before merging -- see TUTORIAL
+# section 7.
+config.Data.ignoreLocality = True
 config.Site.storageSite = 'T3_CH_CERNBOX'
