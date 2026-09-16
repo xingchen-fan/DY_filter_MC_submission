@@ -27,9 +27,13 @@ else's area.
 ```bash
 ssh lxplus
 cd <YOUR_WORK_DIR>
-git clone git@github.com:xingchen-fan/DY_filter_MC_submission.git
+git clone https://github.com/xingchen-fan/DY_filter_MC_submission.git
 cd DY_filter_MC_submission/Run3
 ```
+
+The repository is public, so this needs no GitHub account and no SSH key. Use
+the `git@github.com:` form instead only if you already have a key on lxplus and
+intend to push back; submitting jobs never requires that.
 
 Everything below is run from this `Run3` directory. Paths inside the configs
 (`psetName`, `scriptExe`, `inputFiles`) are resolved against the directory you
