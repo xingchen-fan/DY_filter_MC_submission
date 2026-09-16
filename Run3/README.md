@@ -296,9 +296,12 @@ Two things that are easy to break:
   `FallbackFileOpenError` (measured 33% failure). The lists here are the
   on-disk subsets.
 * **Jobs run anywhere, and read premix over the WAN when they have to.** The
-  configs set `Data.ignoreLocality = True` and carry no site whitelist. Until
-  2026-09-16 they whitelisted `T2_CH_CERN` and `T1_US_FNAL`, which meant CERN
-  alone -- FNAL is never in the site list CRAB derives for a generation task --
+  configs set `Data.ignoreLocality = True`, which lets a job overflow past the
+  whitelist; the whitelist stays at `T2_CH_CERN` and `T1_US_FNAL`, both because
+  CRAB refuses the config without one when `ignoreLocality` is set, and because
+  those are the two sites that hold premix. Until 2026-09-16 there was no
+  `ignoreLocality` and the whitelist meant CERN alone -- FNAL is never in the
+  site list CRAB derives for a generation task --
   and one site is not enough for thirteen people sharing a fold. Jobs at a site
   with no premix replica take about twice as long, and one in ten of a ten-job
   sample wrote 7 events instead of ~300 while still exiting 0. Run
