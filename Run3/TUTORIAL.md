@@ -232,6 +232,16 @@ means nothing.
 Only after the small run has landed output and passed section 7, and one era
 at a time. Section 9 says why that last part is not a preference.
 
+**One fold** is the unit these numbers are in: enough jobs that the events
+surviving the analysis baseline selection match what the existing central DY
+sample already has. One fold doubles the DY statistics.
+
+The budget is **five jobs per baseline event** — a job generates 10,000 events
+and about 0.2 of one (20%) is still standing after baseline. So every job count
+below is 5x the era's "existing events after baseline" column in `README.md`,
+and one fifth of a fold is the point where you have produced one job per event
+you are trying to match.
+
 Try ten jobs first, then the era. Both commands, per era:
 
 | era | trial (10 jobs) | one full fold |
@@ -243,76 +253,101 @@ Try ten jobs first, then the era. Both commands, per era:
 | `2024_2E` | `./submit_run3.sh --units 10 2024_2E 1 test 1` | **36 tasks**, 353,500 jobs † |
 | `2024_2Mu` | `./submit_run3.sh --units 10 2024_2Mu 1 test 1` | **36 tasks**, 353,500 jobs † |
 
-A fold is not one command. Send about **8 tasks at a time** and add the next
-batch when the previous one has mostly landed — `first_index` is what continues
-the numbering, and reusing an index would write a second production into the
-first one's directory:
+Each line below is one person's whole share. Run yours, once.
+
+Nobody has to coordinate with anybody to do this safely. Your output goes under
+your own `$USER` directory, your seed is derived from your username, and no two
+people can land on the same events. The index ranges are disjoint for a
+different reason: every job names its file after the tag and index, so
+non-overlapping ranges are what keeps the filenames unique once all of this is
+merged into one place.
 
 ```bash
 # 2022preEE -- 7 tasks
-./submit_run3.sh 2022preEE     7  p1 1    # p1_1 .. p1_7
+./submit_run3.sh 2022preEE     7  p1 1    # p1_1 .. p1_7    Jookang
 
-# 2022postEE -- 22 tasks, 3 batches
-./submit_run3.sh 2022postEE    8  p1 1    # p1_1 .. p1_8
-./submit_run3.sh 2022postEE    8  p1 9    # p1_9 .. p1_16
-./submit_run3.sh 2022postEE    6  p1 17   # p1_17 .. p1_22
+# 2022postEE -- 22 tasks
+./submit_run3.sh 2022postEE    6  p1 1    # p1_1 .. p1_6    Junhyeok  (1 of 2)
+./submit_run3.sh 2022postEE    5  p1 7    # p1_7 .. p1_11   Junhyeok  (2 of 2)
+./submit_run3.sh 2022postEE    6  p1 12   # p1_12 .. p1_17  Junwon  (1 of 2)
+./submit_run3.sh 2022postEE    5  p1 18   # p1_18 .. p1_22  Junwon  (2 of 2)
 
 # 2023preBPix -- 8 tasks
-./submit_run3.sh 2023preBPix   8  p1 1    # p1_1 .. p1_8
+./submit_run3.sh 2023preBPix   8  p1 1    # p1_1 .. p1_8    Joseph
 
 # 2023postBPix -- 5 tasks
-./submit_run3.sh 2023postBPix  5  p1 1    # p1_1 .. p1_5
+./submit_run3.sh 2023postBPix  5  p1 1    # p1_1 .. p1_5    Peike
 
-# 2024_2E -- 36 tasks, 5 batches
-./submit_run3.sh 2024_2E       8  p1 1    # p1_1 .. p1_8
-./submit_run3.sh 2024_2E       8  p1 9    # p1_9 .. p1_16
-./submit_run3.sh 2024_2E       8  p1 17   # p1_17 .. p1_24
-./submit_run3.sh 2024_2E       8  p1 25   # p1_25 .. p1_32
-./submit_run3.sh 2024_2E       4  p1 33   # p1_33 .. p1_36
+# 2024_2E -- 36 tasks
+./submit_run3.sh 2024_2E       5  p1 1    # p1_1 .. p1_5    Pei-Zhu  (1 of 2)
+./submit_run3.sh 2024_2E       4  p1 6    # p1_6 .. p1_9    Pei-Zhu  (2 of 2)
+./submit_run3.sh 2024_2E       5  p1 10   # p1_10 .. p1_14  Amrutha  (1 of 2)
+./submit_run3.sh 2024_2E       4  p1 15   # p1_15 .. p1_18  Amrutha  (2 of 2)
+./submit_run3.sh 2024_2E       5  p1 19   # p1_19 .. p1_23  Mingxu  (1 of 2)
+./submit_run3.sh 2024_2E       4  p1 24   # p1_24 .. p1_27  Mingxu  (2 of 2)
+./submit_run3.sh 2024_2E       5  p1 28   # p1_28 .. p1_32  Mingtao  (1 of 2)
+./submit_run3.sh 2024_2E       4  p1 33   # p1_33 .. p1_36  Mingtao  (2 of 2)
 
-# 2024_2Mu -- 36 tasks, 5 batches
-./submit_run3.sh 2024_2Mu      8  p1 1    # p1_1 .. p1_8
-./submit_run3.sh 2024_2Mu      8  p1 9    # p1_9 .. p1_16
-./submit_run3.sh 2024_2Mu      8  p1 17   # p1_17 .. p1_24
-./submit_run3.sh 2024_2Mu      8  p1 25   # p1_25 .. p1_32
-./submit_run3.sh 2024_2Mu      4  p1 33   # p1_33 .. p1_36
+# 2024_2Mu -- 36 tasks
+./submit_run3.sh 2024_2Mu      5  p1 1    # p1_1 .. p1_5    Yue Pan  (1 of 2)
+./submit_run3.sh 2024_2Mu      4  p1 6    # p1_6 .. p1_9    Yue Pan  (2 of 2)
+./submit_run3.sh 2024_2Mu      5  p1 10   # p1_10 .. p1_14  Junhyuk Lee  (1 of 2)
+./submit_run3.sh 2024_2Mu      4  p1 15   # p1_15 .. p1_18  Junhyuk Lee  (2 of 2)
+./submit_run3.sh 2024_2Mu      5  p1 19   # p1_19 .. p1_23  Xingchen  (1 of 2)
+./submit_run3.sh 2024_2Mu      4  p1 24   # p1_24 .. p1_27  Xingchen  (2 of 2)
+./submit_run3.sh 2024_2Mu      5  p1 28   # p1_28 .. p1_32  Sungbeom  (1 of 2)
+./submit_run3.sh 2024_2Mu      4  p1 33   # p1_33 .. p1_36  Sungbeom  (2 of 2)
 ```
 
-Eight is not a magic number, it is roughly what the queue absorbs: a task puts
-only about 1,000 of its jobs into the global pool at a time, so eight tasks
-already keep ~8,000 jobs queued. Measured on 2023preBPix, that queue delivered
-about 60 finished jobs an hour, so a batch of eight is days of work, not hours.
-Sending the next batch early does not make the first one faster — section 9.
+What that adds up to:
 
-† **2024 is one fold split in two, and the number itself is unmeasured.**
-README's 707,000 is the total for 2024, not the figure for each flavor: every
-row of that table is the same rule, five jobs per baseline event, and 2024's
-input to it is an inclusive count like every other row. Splitting by lepton
-flavor changes who generates the events, not how many are needed -- a
-`2024_2E` job makes only ee, but makes it at roughly twice the rate an
-inclusive job does -- so the two flavors take about half of the 707,000 each.
-Roughly: ee and mumu do not contribute equally to the baseline.
+| era | tasks | people | each |
+|---|---|---|---|
+| `2022preEE` | 7 | 1 | 7 |
+| `2022postEE` | 22 | 2 | 11 |
+| `2023preBPix` | 8 | 1 | 8 |
+| `2023postBPix` | 5 | 1 | 5 |
+| `2024_2E` | 36 | 4 | 9 |
+| `2024_2Mu` | 36 | 4 | 9 |
 
-The 707,000 is also the one number in the table that has never been checked
-against a real job. It assumes 2024 yields what the other eras yield, and 2024
-is known to be less efficient -- by how much is unclear, since README quotes
-both 1.45% and ~2.5% for the same filter. Run the trial, count the baseline
-events it actually yields, and derive the task count from that. Do not scale
-the gen-filter efficiency: that is what overestimated 2022postEE by a factor
-of three.
+Thirteen people, 5 to 11 tasks each. **Nobody appears under two eras**, and that
+is deliberate: grid priority is charged per user, so a person split across two
+eras divides their own share between them and finishes neither sooner. It is
+also why the shares cannot be made perfectly equal -- the eras come in sizes of
+5, 7, 8, 22, 36, 36, and a person has to fit inside one of them.
 
-The other numbers come from `README.md`, which also explains the `1.06x` the
-new filter costs. Do not re-derive any of them from the gen-filter efficiency.
+Where somebody's share is more than 8 tasks it is written as two lines, because
+one person should not have more than about 8 tasks queued at once. **Send the
+first line, and the second only when the first has largely landed.**
+
+Splitting the work across people is not the same as one person sending more
+tasks. Grid priority is charged per user, so thirteen people each submitting
+their share draw on thirteen separate shares — that is the reason to organize
+it this way rather than have one person send all 114 tasks. Within one person,
+the old limit still holds: no more than about **8 tasks queued at a time**, and
+one era at a time. A task only puts about 1,000 of its jobs into the global
+pool, so 8 tasks already keep the queue full, and on 2023preBPix that queue
+returned about 60 finished jobs an hour.
+
+2024 needs 72 of the 114 tasks, which is why eight of the thirteen are on it.
+It is also the one number here that has never been measured -- see the footnote
+below.
 
 ---
 
 ## 9. Two rules that are not optional
 
-**One era at a time.** On 2026-09-06, 77 tasks (770,000 jobs) went in at once.
-The next day produced 19,226 files; the day after that, 1,552 — a factor of 12,
-with identical settings. That is the fair-share share being spent. Submitting
-more tasks does not buy more slots; each task only puts about 1,000 jobs into
-the pool anyway.
+**One era at a time, per person.** On 2026-09-06, 77 tasks (770,000 jobs) went
+in at once from a single account. The next day produced 19,226 files; the day
+after that, 1,552 — a factor of 12, with identical settings. That was one
+person's fair share being spent. Submitting more tasks does not buy more slots;
+each task only puts about 1,000 jobs into the pool anyway.
+
+More people does buy slots, because priority is charged per user. The thirteen
+submitters in section 8 draw on thirteen separate shares, which is why six eras
+can be in flight at once there without contradicting this rule — and why one of
+those thirteen running two eras at once would contradict it, dividing their own
+share between two things instead of finishing one.
 
 **Never reuse a tag for a new production.** The tag is the output subdirectory.
 Reusing one mixes two productions in one place, and after the fact there is no
