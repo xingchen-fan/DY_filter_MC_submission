@@ -23,6 +23,21 @@ config.JobType.numCores = 8
 # matches badly -- a 5-job test sat idle for 12 h at 20000 and started within
 # 2 h at 16000. Measured peak across 1,227 finished jobs is 13,722 MB at four
 # threads and 13,646 MB at eight, so 16000 leaves ~17% headroom.
+# 16,000 and not 20,000. 20,000 is the ceiling for an 8-core job (2.5 GB/core)
+# and asking for the ceiling matches badly -- it was why 2023preBPix queued so
+# poorly, and that era was dropped to 16,000 on 2026-09-14 while the other five
+# were left at the ceiling.
+#
+# Measured peaks, all 8-core: 2023preBPix 14,902 MB, 2024_2E 13,727 MB,
+# 2024_2Mu 13,741 MB, and 13,680 MB in a probe of 2023preBPix at a remote site.
+# 16,000 leaves 7% headroom over the worst of those.
+#
+# 🔴 2022preEE, 2022postEE and 2023postBPix have never been measured at 8
+# cores. Their premix conditions differ, so their peak may not match the eras
+# above; this value is an extrapolation for them, adopted deliberately on
+# 2026-09-17 rather than measured. If jobs of those three start dying, this is
+# the first thing to raise back to 20,000 -- a job killed for memory is a
+# wasted job, not a slow one.
 config.JobType.maxMemoryMB = 16000
 config.JobType.maxJobRuntimeMin = 600
 
