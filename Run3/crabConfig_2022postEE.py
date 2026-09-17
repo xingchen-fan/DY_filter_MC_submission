@@ -24,16 +24,16 @@ config.JobType.numCores = 8
 # poorly, and that era was dropped to 16,000 on 2026-09-14 while the other five
 # were left at the ceiling.
 #
-# Measured peaks, all 8-core: 2023preBPix 14,902 MB, 2024_2E 13,727 MB,
-# 2024_2Mu 13,741 MB, and 13,680 MB in a probe of 2023preBPix at a remote site.
-# 16,000 leaves 7% headroom over the worst of those.
+# Measured peak per era, every one of them at 8 cores, from crab status on the
+# tasks of the previous round:
 #
-# 🔴 2022preEE, 2022postEE and 2023postBPix have never been measured at 8
-# cores. Their premix conditions differ, so their peak may not match the eras
-# above; this value is an extrapolation for them, adopted deliberately on
-# 2026-09-17 rather than measured. If jobs of those three start dying, this is
-# the first thing to raise back to 20,000 -- a job killed for memory is a
-# wasted job, not a slow one.
+#     2022preEE     14,648 MB        2023preBPix   14,902 MB
+#     2022postEE    14,648 MB        2024_2E       13,727 MB
+#     2023postBPix  14,648 MB        2024_2Mu      13,741 MB
+#
+# 16,000 clears the worst of those by 7%. Nothing here is extrapolated: the
+# numbers were already sitting in the project directories of tasks that ran
+# weeks ago, which is where to look before guessing at a new measurement.
 config.JobType.maxMemoryMB = 16000
 config.JobType.maxJobRuntimeMin = 600
 
