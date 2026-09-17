@@ -345,14 +345,32 @@ merged into one place.
 
 What that adds up to:
 
-| era | tasks | people | each |
-|---|---|---|---|
-| `2022preEE` | 7 | 1 | 7 |
-| `2022postEE` | 22 | 2 | 11 |
-| `2023preBPix` | 8 | 1 | 8 |
-| `2023postBPix` | 5 | 1 | 5 |
-| `2024_2E` | 36 | 4 | 9 |
-| `2024_2Mu` | 36 | 4 | 9 |
+| era | tasks | people | each | days |
+|---|---|---|---|---|
+| `2022preEE` | 7 | 1 | 7 | ~7 |
+| `2022postEE` | 22 | 2 | 11 | ~11 |
+| `2023preBPix` | 8 | 1 | 8 | ~8 |
+| `2023postBPix` | 5 | 1 | 5 | ~5 |
+| `2024_2E` | 36 | 4 | 9 | ~9 |
+| `2024_2Mu` | 36 | 4 | 9 | ~9 |
+
+One person gets through roughly **10,000 jobs a day** -- measured here on
+2026-09-16/17, nine tasks of `2024_2E` returning 9,091 files in their first 24
+hours. A task is 10,000 jobs, so the number of tasks you hold and the number of
+days you wait are about the same number, and that is where the last column
+comes from.
+
+What is limited is you, not the tasks. Your grid share is what decides how many
+jobs a day come back, and holding more tasks divides that same share among more
+of them rather than raising it -- which is why the days column tracks your total
+tasks and not how you group them, and why sending all eleven at once would not
+finish sooner than sending six and then five. What holding several tasks does
+buy is a queue that never runs dry, so the share is actually spent; that is the
+reason for 8 at a time rather than 1.
+
+The number also assumes a share as fresh as ours was. Over the same hours, the
+arm of that test pinned to a single site slowed by a factor of three as its
+priority was spent. Treat the column as the optimistic end.
 
 Thirteen people, 5 to 11 tasks each. **Nobody appears under two eras**, and that
 is deliberate: grid priority is charged per user, so a person split across two
