@@ -12,9 +12,11 @@ somebody a production.
 
 ## 0. Before you start
 
-You need a **grid certificate** installed in your browser and on lxplus:
-[WorkBookStartingGrid](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookStartingGrid).
-Nothing below works without it, and the failure it gives is not obvious.
+You need a **grid certificate** installed in your browser and on lxplus. If you
+do not have one, or yours has expired, stop here and do
+[GRID_CERTIFICATE.md](GRID_CERTIFICATE.md) first -- it is an hour, mostly
+waiting, and once a year. Nothing below works without it, and the failure it
+gives does not mention the certificate.
 
 You also need write access to wherever the output goes. The default is your own
 subdirectory of the shared project space, so you are not writing into anybody
