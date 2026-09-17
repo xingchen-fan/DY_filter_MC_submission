@@ -257,6 +257,7 @@ Tracked — this is the production:
 |---|---|
 | `submit_run3.sh` | writes one CRAB config per task and submits |
 | `recover.sh` | retries failed jobs; finds and removes files that exited 0 with almost no events |
+| `GRID_CERTIFICATE.md` | getting and installing the grid certificate everything else needs |
 | `crabConfig_<era>.py` | the six templates; `submit_run3.sh` rewrites name/tag/output |
 | `job/<era>DY.sh` | the actual job: cmsDriver chain + stage-out |
 | `gen_filter/MatchDYFilter.cc` | the GEN filter, compiled on the worker node |
