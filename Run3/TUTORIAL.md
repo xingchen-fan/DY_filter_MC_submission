@@ -308,39 +308,56 @@ merged into one place.
 
 ```bash
 # 2022preEE -- 7 tasks
-./submit_run3.sh 2022preEE     7  fold1 1    # fold1_1 .. fold1_7    Jookang
+./submit_run3.sh 2022preEE     3  fold1 1    # fold1_1 .. fold1_3    Jookang  (1 of 3)
+./submit_run3.sh 2022preEE     2  fold1 4    # fold1_4 .. fold1_5    Jookang  (2 of 3)
+./submit_run3.sh 2022preEE     2  fold1 6    # fold1_6 .. fold1_7    Jookang  (3 of 3)
 
 # 2022postEE -- 22 tasks
-./submit_run3.sh 2022postEE    6  fold1 1    # fold1_1 .. fold1_6    Junhyeok Song  (1 of 2)
-./submit_run3.sh 2022postEE    5  fold1 7    # fold1_7 .. fold1_11   Junhyeok Song  (2 of 2)
-./submit_run3.sh 2022postEE    6  fold1 12   # fold1_12 .. fold1_17  Junwon  (1 of 2)
-./submit_run3.sh 2022postEE    5  fold1 18   # fold1_18 .. fold1_22  Junwon  (2 of 2)
+./submit_run3.sh 2022postEE    3  fold1 1    # fold1_1 .. fold1_3    Junhyeok Song  (1 of 4)
+./submit_run3.sh 2022postEE    3  fold1 4    # fold1_4 .. fold1_6    Junhyeok Song  (2 of 4)
+./submit_run3.sh 2022postEE    3  fold1 7    # fold1_7 .. fold1_9    Junhyeok Song  (3 of 4)
+./submit_run3.sh 2022postEE    2  fold1 10   # fold1_10 .. fold1_11  Junhyeok Song  (4 of 4)
+./submit_run3.sh 2022postEE    3  fold1 12   # fold1_12 .. fold1_14  Junwon  (1 of 4)
+./submit_run3.sh 2022postEE    3  fold1 15   # fold1_15 .. fold1_17  Junwon  (2 of 4)
+./submit_run3.sh 2022postEE    3  fold1 18   # fold1_18 .. fold1_20  Junwon  (3 of 4)
+./submit_run3.sh 2022postEE    2  fold1 21   # fold1_21 .. fold1_22  Junwon  (4 of 4)
 
 # 2023preBPix -- 8 tasks
-./submit_run3.sh 2023preBPix   8  fold1 1    # fold1_1 .. fold1_8    Joseph
+./submit_run3.sh 2023preBPix   3  fold1 1    # fold1_1 .. fold1_3    Joseph  (1 of 3)
+./submit_run3.sh 2023preBPix   3  fold1 4    # fold1_4 .. fold1_6    Joseph  (2 of 3)
+./submit_run3.sh 2023preBPix   2  fold1 7    # fold1_7 .. fold1_8    Joseph  (3 of 3)
 
 # 2023postBPix -- 5 tasks
-./submit_run3.sh 2023postBPix  5  fold1 1    # fold1_1 .. fold1_5    Peike
+./submit_run3.sh 2023postBPix  3  fold1 1    # fold1_1 .. fold1_3    Peike  (1 of 2)
+./submit_run3.sh 2023postBPix  2  fold1 4    # fold1_4 .. fold1_5    Peike  (2 of 2)
 
 # 2024_2E -- 36 tasks
-./submit_run3.sh 2024_2E       5  fold1 1    # fold1_1 .. fold1_5    Pei-Zhu  (1 of 2)
-./submit_run3.sh 2024_2E       4  fold1 6    # fold1_6 .. fold1_9    Pei-Zhu  (2 of 2)
-./submit_run3.sh 2024_2E       5  fold1 10   # fold1_10 .. fold1_14  Amrutha  (1 of 2)
-./submit_run3.sh 2024_2E       4  fold1 15   # fold1_15 .. fold1_18  Amrutha  (2 of 2)
-./submit_run3.sh 2024_2E       5  fold1 19   # fold1_19 .. fold1_23  Mingxu  (1 of 2)
-./submit_run3.sh 2024_2E       4  fold1 24   # fold1_24 .. fold1_27  Mingxu  (2 of 2)
-./submit_run3.sh 2024_2E       5  fold1 28   # fold1_28 .. fold1_32  Mingtao  (1 of 2)
-./submit_run3.sh 2024_2E       4  fold1 33   # fold1_33 .. fold1_36  Mingtao  (2 of 2)
+./submit_run3.sh 2024_2E       3  fold1 1    # fold1_1 .. fold1_3    Pei-Zhu  (1 of 4)
+./submit_run3.sh 2024_2E       3  fold1 4    # fold1_4 .. fold1_6    Pei-Zhu  (2 of 4)
+./submit_run3.sh 2024_2E       3  fold1 7    # fold1_7 .. fold1_9    Pei-Zhu  (3 of 4)
+./submit_run3.sh 2024_2E       3  fold1 10   # fold1_10 .. fold1_12  Pei-Zhu  (4 of 4)
+./submit_run3.sh 2024_2E       3  fold1 13   # fold1_13 .. fold1_15  Mingxu  (1 of 4)
+./submit_run3.sh 2024_2E       3  fold1 16   # fold1_16 .. fold1_18  Mingxu  (2 of 4)
+./submit_run3.sh 2024_2E       3  fold1 19   # fold1_19 .. fold1_21  Mingxu  (3 of 4)
+./submit_run3.sh 2024_2E       3  fold1 22   # fold1_22 .. fold1_24  Mingxu  (4 of 4)
+./submit_run3.sh 2024_2E       3  fold1 25   # fold1_25 .. fold1_27  Mingtao  (1 of 4)
+./submit_run3.sh 2024_2E       3  fold1 28   # fold1_28 .. fold1_30  Mingtao  (2 of 4)
+./submit_run3.sh 2024_2E       3  fold1 31   # fold1_31 .. fold1_33  Mingtao  (3 of 4)
+./submit_run3.sh 2024_2E       3  fold1 34   # fold1_34 .. fold1_36  Mingtao  (4 of 4)
 
 # 2024_2Mu -- 36 tasks
-./submit_run3.sh 2024_2Mu      5  fold1 1    # fold1_1 .. fold1_5    Yue Pan  (1 of 2)
-./submit_run3.sh 2024_2Mu      4  fold1 6    # fold1_6 .. fold1_9    Yue Pan  (2 of 2)
-./submit_run3.sh 2024_2Mu      5  fold1 10   # fold1_10 .. fold1_14  Junhyuk Lee  (1 of 2)
-./submit_run3.sh 2024_2Mu      4  fold1 15   # fold1_15 .. fold1_18  Junhyuk Lee  (2 of 2)
-./submit_run3.sh 2024_2Mu      5  fold1 19   # fold1_19 .. fold1_23  Xingchen  (1 of 2)
-./submit_run3.sh 2024_2Mu      4  fold1 24   # fold1_24 .. fold1_27  Xingchen  (2 of 2)
-./submit_run3.sh 2024_2Mu      5  fold1 28   # fold1_28 .. fold1_32  Sungbeom  (1 of 2)
-./submit_run3.sh 2024_2Mu      4  fold1 33   # fold1_33 .. fold1_36  Sungbeom  (2 of 2)
+./submit_run3.sh 2024_2Mu      3  fold1 1    # fold1_1 .. fold1_3    Yue Pan  (1 of 3)
+./submit_run3.sh 2024_2Mu      3  fold1 4    # fold1_4 .. fold1_6    Yue Pan  (2 of 3)
+./submit_run3.sh 2024_2Mu      3  fold1 7    # fold1_7 .. fold1_9    Yue Pan  (3 of 3)
+./submit_run3.sh 2024_2Mu      3  fold1 10   # fold1_10 .. fold1_12  Junhyuk Lee  (1 of 3)
+./submit_run3.sh 2024_2Mu      3  fold1 13   # fold1_13 .. fold1_15  Junhyuk Lee  (2 of 3)
+./submit_run3.sh 2024_2Mu      3  fold1 16   # fold1_16 .. fold1_18  Junhyuk Lee  (3 of 3)
+./submit_run3.sh 2024_2Mu      3  fold1 19   # fold1_19 .. fold1_21  Xingchen  (1 of 3)
+./submit_run3.sh 2024_2Mu      3  fold1 22   # fold1_22 .. fold1_24  Xingchen  (2 of 3)
+./submit_run3.sh 2024_2Mu      3  fold1 25   # fold1_25 .. fold1_27  Xingchen  (3 of 3)
+./submit_run3.sh 2024_2Mu      3  fold1 28   # fold1_28 .. fold1_30  Sungbeom  (1 of 3)
+./submit_run3.sh 2024_2Mu      3  fold1 31   # fold1_31 .. fold1_33  Sungbeom  (2 of 3)
+./submit_run3.sh 2024_2Mu      3  fold1 34   # fold1_34 .. fold1_36  Sungbeom  (3 of 3)
 ```
 
 What that adds up to:
@@ -351,7 +368,7 @@ What that adds up to:
 | `2022postEE` | 22 | 2 | 11 | ~11 |
 | `2023preBPix` | 8 | 1 | 8 | ~8 |
 | `2023postBPix` | 5 | 1 | 5 | ~5 |
-| `2024_2E` | 36 | 4 | 9 | ~9 |
+| `2024_2E` | 36 | 3 | 12 | ~12 |
 | `2024_2Mu` | 36 | 4 | 9 | ~9 |
 
 One person gets through roughly **10,000 jobs a day** -- measured here on
@@ -366,13 +383,13 @@ of them rather than raising it -- which is why the days column tracks your total
 tasks and not how you group them, and why sending all eleven at once would not
 finish sooner than sending six and then five. What holding several tasks does
 buy is a queue that never runs dry, so the share is actually spent; that is the
-reason for 8 at a time rather than 1.
+reason for 3 at a time rather than 1.
 
 The number also assumes a share as fresh as ours was. Over the same hours, the
 arm of that test pinned to a single site slowed by a factor of three as its
 priority was spent. Treat the column as the optimistic end.
 
-Thirteen people, 5 to 11 tasks each. **Nobody appears under two eras**, and that
+Twelve people, 5 to 12 tasks each. **Nobody appears under two eras**, and that
 is deliberate: grid priority is charged per user, so a person split across two
 eras divides their own share between them and finishes neither sooner. It is
 also why the shares cannot be made equal -- the eras come in sizes of 5, 7, 8,
@@ -381,20 +398,20 @@ also why the shares cannot be made equal -- the eras come in sizes of 5, 7, 8,
 Junhyeok Song and Junhyuk Lee are two people, on two different eras. Both are
 written with a surname for that reason; do not collapse them into one.
 
-Where somebody's share is more than 8 tasks it is written as two lines, because
-one person should not have more than about 8 tasks queued at once. **Send the
-first line, and the second only when the first has largely landed.**
+Every share is written as a series of lines of at most **3 tasks**, so that no
+single submission puts more than 30,000 jobs in at once. **Send one line, and
+the next only when it has largely landed.**
 
 Splitting the work across people is not the same as one person sending more
-tasks. Grid priority is charged per user, so thirteen people each submitting
-their share draw on thirteen separate shares — that is the reason to organize
+tasks. Grid priority is charged per user, so twelve people each submitting
+their share draw on twelve separate shares — that is the reason to organize
 it this way rather than have one person send all 114 tasks. Within one person,
-the old limit still holds: no more than about **8 tasks queued at a time**, and
+the limit still holds: **at most 3 tasks, 30,000 jobs, per submission**, and
 one era at a time. A task only puts about 1,000 of its jobs into the global
-pool, so 8 tasks already keep the queue full, and on 2023preBPix that queue
+pool, so three already keep the queue fed, and on 2023preBPix that queue
 returned about 60 finished jobs an hour.
 
-2024 needs 72 of the 114 tasks, which is why eight of the thirteen are on it.
+2024 needs 72 of the 114 tasks, which is why seven of the twelve are on it.
 It is also the one number here that has never been measured -- see the footnote
 below.
 
@@ -408,10 +425,10 @@ after that, 1,552 — a factor of 12, with identical settings. That was one
 person's fair share being spent. Submitting more tasks does not buy more slots;
 each task only puts about 1,000 jobs into the pool anyway.
 
-More people does buy slots, because priority is charged per user. The thirteen
-submitters in section 8 draw on thirteen separate shares, which is why six eras
+More people does buy slots, because priority is charged per user. The twelve
+submitters in section 8 draw on twelve separate shares, which is why six eras
 can be in flight at once there without contradicting this rule — and why one of
-those thirteen running two eras at once would contradict it, dividing their own
+those twelve running two eras at once would contradict it, dividing their own
 share between two things instead of finishing one.
 
 **Never reuse a tag for a new production.** The tag is the output subdirectory.

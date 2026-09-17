@@ -1,5 +1,9 @@
 # Run 3 DY filter MC — job submission
 
+📈 **[Production status spreadsheet](https://docs.google.com/spreadsheets/d/16R7L_nycmKkWsSV0h6ay0dWHEchZTC1nOp2i6Gal0G8/edit?gid=329992653#gid=329992653)**
+— who is submitting what, and how far along it is. Update your row as you go;
+it is the only place the whole fold can be seen at once.
+
 **Submitting for the first time?** Start with [`TUTORIAL.md`](TUTORIAL.md),
 a walkthrough from `git clone` to a full era with a check after every step.
 This file is the reference: what the sample is and how many jobs it needs.
@@ -304,7 +308,7 @@ Two things that are easy to break:
   those are the two sites that hold premix. Until 2026-09-16 there was no
   `ignoreLocality` and the whitelist meant CERN alone -- FNAL is never in the
   site list CRAB derives for a generation task --
-  and one site is not enough for thirteen people sharing a fold. Jobs at a site
+  and one site is not enough for the people sharing a fold. Jobs at a site
   with no premix replica take about twice as long, and one in ten of a ten-job
   sample wrote 7 events instead of ~300 while still exiting 0. Run
   `tools/check_event_counts.py` over the output before merging; nothing else
