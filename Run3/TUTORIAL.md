@@ -385,6 +385,9 @@ finish sooner than sending six and then five. What holding several tasks does
 buy is a queue that never runs dry, so the share is actually spent; that is the
 reason for 3 at a time rather than 1.
 
+The fold is finished when the last share is, so **about 12 days** -- the three
+people on `2024_2E` set that, and everybody else has slack.
+
 The number also assumes a share as fresh as ours was. Over the same hours, the
 arm of that test pinned to a single site slowed by a factor of three as its
 priority was spent. Treat the column as the optimistic end.
@@ -400,7 +403,9 @@ written with a surname for that reason; do not collapse them into one.
 
 Every share is written as a series of lines of at most **3 tasks**, so that no
 single submission puts more than 30,000 jobs in at once. **Send one line, and
-the next only when it has largely landed.**
+the next only when it has largely landed** -- and run `./recover.sh <era> fold1`
+before each new line, because roughly a tenth of the jobs fail and stay failed
+until somebody resubmits them. Section 10.
 
 Splitting the work across people is not the same as one person sending more
 tasks. Grid priority is charged per user, so twelve people each submitting
@@ -437,7 +442,7 @@ way to tell which file came from which.
 
 ---
 
-## 10. When something goes wrong
+## 10. Recovery, which is routine, and the rest of what goes wrong
 
 Start here, from the `Run3` directory and inside the section 2 environment:
 
@@ -445,6 +450,24 @@ Start here, from the `Run3` directory and inside the section 2 environment:
 ./recover.sh 2024_2E fold1            # report only
 ./recover.sh 2024_2E fold1 --apply    # act
 ```
+
+**Run it once a day, and always before you send your next line.** This is not
+only for when something looks wrong: about **10% of jobs fail** with the sites
+opened up, and they do not resubmit themselves once their retries run out.
+Measured over the first day of this round, on the same era and payload:
+
+| | finished | failed | failure rate |
+|---|---|---|---|
+| pinned to T2_CH_CERN | 4,828 | 0 | 0.0% |
+| sites opened up | 5,792 | 620 | **9.7%** |
+
+That is the price of the throughput -- the opened-up half still produced more
+per task, and a failed job is wasted grid time rather than lost events, because
+the seed is derived and a retry regenerates exactly what was lost. But it is
+only recovered if somebody asks for it. Leave it until the end of your share
+and you finish, discover a tenth of it is missing, and start a fresh cycle for
+the remainder. Running it before each new line resubmits the last batch's
+failures while the new batch is queueing, and they cost nothing extra.
 
 It handles the two failures separately, because they need opposite treatment.
 
