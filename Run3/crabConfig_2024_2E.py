@@ -20,7 +20,22 @@ config.JobType.inputFiles = ['premix_lists/premix_ondisk_2024_slice00.txt',
                              'gen_filter/MatchDYFilter.cc',
                              'gen_filter/BuildFile.xml']
 config.JobType.numCores = 8
-config.JobType.maxMemoryMB = 20000
+# 16,000 and not 20,000. 20,000 is the ceiling for an 8-core job (2.5 GB/core)
+# and asking for the ceiling matches badly -- it was why 2023preBPix queued so
+# poorly, and that era was dropped to 16,000 on 2026-09-14 while the other five
+# were left at the ceiling.
+#
+# Measured peaks, all 8-core: 2023preBPix 14,902 MB, 2024_2E 13,727 MB,
+# 2024_2Mu 13,741 MB, and 13,680 MB in a probe of 2023preBPix at a remote site.
+# 16,000 leaves 7% headroom over the worst of those.
+#
+# 🔴 2022preEE, 2022postEE and 2023postBPix have never been measured at 8
+# cores. Their premix conditions differ, so their peak may not match the eras
+# above; this value is an extrapolation for them, adopted deliberately on
+# 2026-09-17 rather than measured. If jobs of those three start dying, this is
+# the first thing to raise back to 20,000 -- a job killed for memory is a
+# wasted job, not a slow one.
+config.JobType.maxMemoryMB = 16000
 config.JobType.maxJobRuntimeMin = 600
 
 config.Data.splitting = 'EventBased'
