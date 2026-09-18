@@ -31,6 +31,20 @@ DEST_BASE=${DEST_BASE:-/eos/project/h/htozg-dy-privatemc/${USER}/HZg/root_DYfilt
 case $ERA in 2024_2E|2024_2Mu) DIR=2024 ;; *) DIR=$ERA ;; esac
 PROJ=$(ls -d crab_projects/crab_DY${ERA}_${TAG}_* 2>/dev/null)
 [ -z "$PROJ" ] && { echo "no crab_projects/crab_DY${ERA}_${TAG}_* here"; exit 1; }
+
+# Get the credential question out of the way first, on its own, where you can
+# actually answer it. CRAB renews its delegation on myproxy.cern.ch with
+# `myproxy-init -C ~/.globus/usercert.pem -y ~/.globus/userkey.pem`, so it reads
+# the passphrase-protected key and stops to ask for the passphrase. Asked from
+# inside the loop below it is unanswerable: that call is wrapped in $( ) with a
+# pipe, so its output is captured rather than shown, and `timeout` puts it in
+# its own process group with no controlling terminal, so what you type never
+# reaches it. You see the prompt and the characters go nowhere.
+echo "checking the credential (you may be asked for your GRID pass phrase) ..."
+crab status -d "$(echo "$PROJ" | head -1)" > /dev/null || {
+  echo "crab cannot run. If it asked for a pass phrase, that is the PEM one you"
+  echo "set when converting mycert.p12 -- see GRID_CERTIFICATE.md section 5."
+  exit 1; }
 echo "era $ERA, tag $TAG, $(echo "$PROJ" | wc -l) task(s)"
 [ "$APPLY" -eq 0 ] && echo "REPORT ONLY -- nothing will be changed. Add --apply to act."
 echo
@@ -39,13 +53,13 @@ echo
 echo "=== jobs CRAB reports as failed ==="
 tot=0
 for p in $PROJ; do
-  n=$(timeout 600 crab status -d "$p" 2>&1 \
+  n=$(timeout --foreground 600 crab status -d "$p" 2>&1 \
       | awk '/^[[:space:]]+failed[[:space:]]/{s=$0; sub(/.*\(/,"",s); sub(/\/.*/,"",s);
              gsub(/[^0-9]/,"",s); print s+0}')
   n=${n:-0}; tot=$((tot+n))
   printf "  %-46s %5d failed\n" "$(basename "$p")" "$n"
   if [ "$n" -gt 0 ] && [ "$APPLY" -eq 1 ]; then
-    timeout 600 crab resubmit -d "$p" 2>&1 | grep -iE "Success|Error" | head -1 | sed 's/^/      /'
+    timeout --foreground 600 crab resubmit -d "$p" 2>&1 | grep -iE "Success|Error" | head -1 | sed 's/^/      /'
   fi
 done
 echo "  total $tot"
