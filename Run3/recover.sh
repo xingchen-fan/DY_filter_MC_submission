@@ -104,7 +104,12 @@ for p in $PROJ; do
   echo "$OUT" | sed -n 's/^ *\([0-9]\+\) events  \(.*\)$/\2/p' \
     | sed "s@^@$d/@" >> "$LIST"
 done
-BAD=$(grep -c . "$LIST" 2>/dev/null || echo 0)
+# wc, not `grep -c . || echo 0`: grep prints 0 AND exits 1 when it matches
+# nothing, so the fallback fires too and BAD becomes the two-line string "0\n0",
+# which every later [ ] test then rejects with "integer expression expected".
+# The count was right and everything after it was broken.
+BAD=$(wc -l < "$LIST" 2>/dev/null)
+BAD=${BAD:-0}
 echo
 echo "  $BAD stunted file(s)"
 if [ "$BAD" -gt 0 ]; then
