@@ -83,7 +83,14 @@ echo "=== files that exited 0 with almost no events ==="
 # while it works. Stunted files come from a site behaving badly, not from one
 # unlucky job, so a sample finds the problem; it does not find every instance,
 # which is what --full is for once you know you have one.
-SAMPLE=${SAMPLE:-200}
+# 20 per task, not more: a file costs about 1.6 s to open on EOS, so 20 across
+# nine tasks is five minutes and 200 would be the best part of an hour -- for
+# something meant to run before every submission. Twenty is enough to *detect*
+# the condition (a 10% rate hides from 20 files 12% of the time, and it would
+# have to hide from every task at once), and detecting is this step's job. When
+# it finds something, rerun with FULL=1 to enumerate and delete every instance;
+# that scan is hours, but by then you know you need it.
+SAMPLE=${SAMPLE:-20}
 [ "$FULL" = "1" ] && SAMPLE=""
 LIST=$(mktemp); trap 'rm -f "$LIST"' EXIT
 for p in $PROJ; do

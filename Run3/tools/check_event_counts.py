@@ -52,6 +52,12 @@ def main(root, min_frac, sample, quiet, list_bad=False):
         paths = paths[::step][:sample]
         print("sampling %d of the files" % len(paths))
 
+    # One file at a time, deliberately. Each costs about 1.6 s on EOS and it
+    # looks like pure latency, so eight threads ought to be eight times faster.
+    # Measured on 2026-09-18: 100 files took 157 s serially and 181 s across
+    # eight threads. The FUSE mount serializes underneath, so the concurrency
+    # buys nothing and adds contention. Do not try it again; make the sample
+    # smaller instead.
     counts, unreadable = [], []
     for p in paths:
         try:
