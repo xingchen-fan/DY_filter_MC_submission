@@ -4,6 +4,9 @@
 #   ./recover.sh <era> <tag>            # report only, changes nothing
 #   ./recover.sh <era> <tag> --apply    # resubmit failed jobs, delete bad files
 #
+#   SAMPLE=500 ./recover.sh ...         # check more files per task (default 200)
+#   FULL=1 ./recover.sh ...             # check every file; hours, not minutes
+#
 # Two things go wrong here and they need opposite treatment.
 #
 # 1. Jobs CRAB knows failed. `crab resubmit` retries them, and because the seed
@@ -68,16 +71,31 @@ echo "  total $tot"
 # ---- 2. files that succeeded and are wrong anyway -------------------------
 echo
 echo "=== files that exited 0 with almost no events ==="
+# Sampled, and once per task rather than twice.
+#
+# This step opens every file it checks to read its event count, over EOS, and
+# that is slow enough to matter: a finished task holds 10,000 files, a share
+# holds several tasks, and a full scan of all of them runs for hours with
+# nothing printed meanwhile -- which is indistinguishable from a hang, and was
+# taken for one on 2026-09-18.
+#
+# So it samples $SAMPLE files per task by default and says which task it is on
+# while it works. Stunted files come from a site behaving badly, not from one
+# unlucky job, so a sample finds the problem; it does not find every instance,
+# which is what --full is for once you know you have one.
+SAMPLE=${SAMPLE:-200}
+[ "$FULL" = "1" ] && SAMPLE=""
 LIST=$(mktemp); trap 'rm -f "$LIST"' EXIT
 for p in $PROJ; do
   t=$(basename "$p" | sed "s@crab_DY${ERA}_@@")
   d="$DEST_BASE/$DIR/$t"
   [ -d "$d" ] || continue
-  python3 tools/check_event_counts.py --dir "$d" 2>&1 | sed 's/^/  /'
-  # --list-bad prints paths only, so the scan above is the human-readable pass
-  # and this one is the machine-readable one. Two passes over a 10,000-file
-  # directory is slow; if that starts to matter, keep only this one.
-  python3 tools/check_event_counts.py --dir "$d" --list-bad 2>/dev/null >> "$LIST"
+  printf "  %-14s " "$t"
+  OUT=$(python3 tools/check_event_counts.py --dir "$d" \
+          ${SAMPLE:+--sample $SAMPLE} 2>&1)
+  echo "$OUT" | grep -E "^[0-9]+ files|^sampling" | tr '\n' ' '; echo
+  echo "$OUT" | sed -n 's/^ *\([0-9]\+\) events  \(.*\)$/\2/p' \
+    | sed "s@^@$d/@" >> "$LIST"
 done
 BAD=$(grep -c . "$LIST" 2>/dev/null || echo 0)
 echo
