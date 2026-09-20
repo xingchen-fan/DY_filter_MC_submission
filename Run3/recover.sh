@@ -56,9 +56,23 @@ echo
 echo "=== jobs CRAB reports as failed ==="
 tot=0
 for p in $PROJ; do
+  # Do not anchor this to the start of the line. CRAB puts the FIRST job state
+  # on the same line as the "Jobs status:" label and indents only the rest:
+  #
+  #     Jobs status:                    failed         5.4% (  543/10000)
+  #                                     finished      94.6% ( 9457/10000)
+  #
+  # A pattern requiring leading whitespace therefore reads 543 failed jobs as
+  # zero -- silently, and precisely for the tasks that failed worst, because
+  # CRAB lists the states in descending order of how many jobs are in them. It
+  # printed "0 failed" for a task whose own status page said 543 and this
+  # script then resubmitted nothing. Match the state wherever it sits, and
+  # require the percent and the "(n/total)" so the line in the error summary
+  # ("543 jobs failed with exit code 5") cannot be counted a second time.
   n=$(timeout --foreground 600 crab status -d "$p" 2>&1 \
-      | awk '/^[[:space:]]+failed[[:space:]]/{s=$0; sub(/.*\(/,"",s); sub(/\/.*/,"",s);
-             gsub(/[^0-9]/,"",s); print s+0}')
+      | awk 'match($0,/failed[[:space:]]+[0-9.]+%[[:space:]]*\([[:space:]]*[0-9]+\//){
+               s=substr($0,RSTART,RLENGTH); sub(/.*\([[:space:]]*/,"",s);
+               sub(/\/.*/,"",s); print s+0}')
   n=${n:-0}; tot=$((tot+n))
   printf "  %-46s %5d failed\n" "$(basename "$p")" "$n"
   if [ "$n" -gt 0 ] && [ "$APPLY" -eq 1 ]; then
