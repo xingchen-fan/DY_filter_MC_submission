@@ -4,8 +4,8 @@
 #   ./recover.sh <era> <tag>            # report only, changes nothing
 #   ./recover.sh <era> <tag> --apply    # resubmit failed jobs, delete bad files
 #
-#   SAMPLE=500 ./recover.sh ...         # check more files per task (default 200)
-#   FULL=1 ./recover.sh ...             # check every file; hours, not minutes
+#   FULL=1 ./recover.sh ...             # open every file (~40 min per task)
+#   SAMPLE=20 ./recover.sh ...          # old behavior: open only N files per task
 #
 # Two things go wrong here and they need opposite treatment.
 #
@@ -85,27 +85,24 @@ echo "  total $tot"
 # ---- 2. files that succeeded and are wrong anyway -------------------------
 echo
 echo "=== files that exited 0 with almost no events ==="
-# Sampled, and once per task rather than twice.
+# Every file is screened; almost none are opened.
 #
-# This step opens every file it checks to read its event count, over EOS, and
-# that is slow enough to matter: a finished task holds 10,000 files, a share
-# holds several tasks, and a full scan of all of them runs for hours with
-# nothing printed meanwhile -- which is indistinguishable from a hang, and was
-# taken for one on 2026-09-18.
+# The checker reads every file's size (a directory listing, seconds), opens a
+# spread sample to calibrate size against event count, and opens only the files
+# whose size puts them anywhere near the threshold. About 40 s for a
+# 10,000-file task -- see tools/check_event_counts.py for the measurements.
 #
-# So it samples $SAMPLE files per task by default and says which task it is on
-# while it works. Stunted files come from a site behaving badly, not from one
-# unlucky job, so a sample finds the problem; it does not find every instance,
-# which is what --full is for once you know you have one.
-# 20 per task, not more: a file costs about 1.6 s to open on EOS, so 20 across
-# nine tasks is five minutes and 200 would be the best part of an hour -- for
-# something meant to run before every submission. Twenty is enough to *detect*
-# the condition (a 10% rate hides from 20 files 12% of the time, and it would
-# have to hide from every task at once), and detecting is this step's job. When
-# it finds something, rerun with FULL=1 to enumerate and delete every instance;
-# that scan is hours, but by then you know you need it.
-SAMPLE=${SAMPLE:-20}
-[ "$FULL" = "1" ] && SAMPLE=""
+# This replaces a 20-file sample, and the sample was not good enough. It rested
+# on stunted files arriving at a high rate from one bad site: a 10% rate hides
+# from 20 files 12% of the time. On 2026-09-29 the full screen found six
+# three-event files in a single 2022postEE task of 4,368 -- a 0.14% rate, which
+# a 20-file sample catches 2.7% of the time. The sample was not detecting the
+# condition; it was missing it almost always.
+#
+# FULL=1 opens every file instead (~40 min per task with six processes).
+# SAMPLE=N restores the old behavior, if you ever want it.
+SAMPLE=${SAMPLE:-}
+[ "$FULL" = "1" ] && { SAMPLE=""; FULLFLAG="--full"; }
 LIST=$(mktemp); trap 'rm -f "$LIST"' EXIT
 for p in $PROJ; do
   t=$(basename "$p" | sed "s@crab_DY${ERA}_@@")
@@ -113,7 +110,7 @@ for p in $PROJ; do
   [ -d "$d" ] || continue
   printf "  %-14s " "$t"
   OUT=$(python3 tools/check_event_counts.py --dir "$d" \
-          ${SAMPLE:+--sample $SAMPLE} 2>&1)
+          ${SAMPLE:+--sample $SAMPLE} $FULLFLAG 2>&1)
   echo "$OUT" | grep -E "^[0-9]+ files|^sampling" | tr '\n' ' '; echo
   echo "$OUT" | sed -n 's/^ *\([0-9]\+\) events  \(.*\)$/\2/p' \
     | sed "s@^@$d/@" >> "$LIST"
