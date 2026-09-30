@@ -1,68 +1,49 @@
 # Run 3 DY filter MC — job submission
 
 📈 **[Production status spreadsheet](https://docs.google.com/spreadsheets/d/16R7L_nycmKkWsSV0h6ay0dWHEchZTC1nOp2i6Gal0G8/edit?gid=329992653#gid=329992653)**
-— who is submitting what, and how far along it is. Update your row as you go;
-it is the only place the whole fold can be seen at once.
+— who is submitting what, and how far along it is. Update your row as you go.
 
-**Submitting for the first time?** Start with [`TUTORIAL.md`](TUTORIAL.md),
-a walkthrough from `git clone` to a full era with a check after every step.
+**Submitting for the first time?** Start with [`TUTORIAL.md`](TUTORIAL.md).
 This file is the reference: what the sample is and how many jobs it needs.
 
 Private DY production with a GEN-level π⁰/η filter, so that only events that can
-enter the DY + fake photon selection are simulated, saving most of the
-SIM/DIGI/RECO CPU. Full chain per job: LHE+GEN → SIM → DIGI+DATAMIX+HLT →
-RECO → MINIAOD → NANOAOD → stage-out. Only the NanoAOD is kept.
+enter the DY + fake photon selection are simulated. Full chain per job: LHE+GEN
+→ SIM → DIGI+DATAMIX+HLT → RECO → MINIAOD → NANOAOD → stage-out. Only the
+NanoAOD is kept. The job script, filter source, fragments and premix file lists
+all travel with the job.
 
-This directory is self-contained: the job script, the filter source, the
-fragments and the premix file lists all travel with the job.
+## The sample definition
 
-## What changed in the current round (from 2026-09-06)
+Output made with an earlier version of the filter or keep rules is a
+**different sample** and must not be mixed in. The current definition differs
+from it in two ways.
 
-The sample definition changed, so output from before this date is a **different
-sample** and must not be mixed in. Two changes:
-
-**1. A tighter gen filter** (`gen_filter/MatchDYFilter.cc`) — the π⁰/η photon
-now also has to have cluster `pT > 10 GeV`, and the event has to have a gen Z
-in `75 < m_ll < 105 GeV`. Measured on a 10-job validation batch:
+**1. A tighter gen filter** (`gen_filter/MatchDYFilter.cc`): the π⁰/η photon
+must have cluster `pT > 10 GeV`, and the event a gen Z with `75 < m_ll < 105 GeV`.
+On a 10-job validation batch:
 
 | | old filter | new filter |
 |---|---|---|
 | 2022postEE | 976 events/job (9.76%) | 303 events/job (3.03%) |
 | 2024_2E | — | 145 events/job (1.45%) |
 
-so 3.22x more jobs are needed for the same number of **gen-filtered events**.
-
-That is not the number to plan with. What matters is how many events survive
-the analysis baseline, and the two do not scale together -- the new filter
-mostly removes events that would have failed the baseline anyway. Measured on
-the full 2022postEE productions, per CRAB job, on SR + Sideband with the same
-corrections and the same overlap removal on both sides:
+That is 3.22x fewer gen-filtered events per job, but not 3.22x fewer analysis
+events: the new filter mostly removes events that would fail the baseline
+anyway. On the full 2022postEE productions (SR + Sideband, same corrections and
+overlap removal):
 
 | | baseline events | CRAB jobs | per job |
 |---|---|---|---|
 | old filter | 9,499 | 30,261 | 0.3139 +- 0.0032 |
 | new filter | 3,717 | 12,604 | 0.2949 +- 0.0048 |
 
-The ratio is 0.939 +- 0.018: the new filter costs about **6% +- 2%** of the
-analysis statistics per job, not a factor of three. Plan with ~1.06x.
+The ratio is 0.939 +- 0.018, so **plan with ~1.06x** the old job counts. Compare
+SR + Sideband only: the old production also had control regions, and summing
+every `*__inclusive` tree gives a spurious 22% deficit.
 
-Compare like with like if you repeat this. The old production had the control
-regions enabled and the new one did not, so summing every `*__inclusive` tree
-gives 12,119 vs 3,717 and a spurious 22% deficit. SR + Sideband is the common
-basis.
-
-**1.06x is not the truth-matching number.** Two different quantities get
-confused here, so to be explicit:
-
-| | what it measures | value |
-|---|---|---|
-| **1.06x** | production side: analysis events per CRAB job, new gen filter vs old | ratio 0.939 +- 0.018, i.e. the new filter costs ~6% |
-| **~11-15%** | analysis side: what a `dR < 0.1` truth-matching requirement removes from the filter sample at full baseline | 11.1% +- 4.3% measured; 15.0% is an exact upper bound |
-
-They are unrelated. The 15.0% is a bound rather than an estimate because jet
-photons make up 85% of the filter sample at full baseline and such a
-requirement keeps 100% of them by construction, so it cannot remove more than
-the remaining 15%.
+1.06x is not the truth-matching number. A `dR < 0.1` truth-matching requirement
+removes 11.1% +- 4.3% of the filter sample at full baseline, at most 15.0%
+(the non-jet-photon fraction). The two are unrelated.
 
 **2. A second gen-particle keep rule** in the cmsDriver steps of `job/*.sh`:
 
@@ -71,34 +52,22 @@ process.prunedGenParticles.select.append('keep status == 1 && pt > 0.5')
 #   ... and the same on process.finalGenParticles for the NANOAOD step
 ```
 
-The first rule (`keep++ ... π⁰/η`) was already there. The new one keeps the
-hadrons, which is what lets the AN-22-027 photon-origin classification be
-reproduced **from NanoAOD** — the production deletes MiniAOD, so without it the
-classification cannot be redone on the output at all. Validated at 93.4%
-per-photon agreement against MiniAOD; see `scripts_plot/README.md`.
-
-It costs disk: 12.0 kB/event against 4.5 kB/event before, because status-1
-hadrons now dominate the `GenPart` record (π± alone is 44% of it).
-
-`tools/sync_keep_rules.py` is what put the rule into all six payloads — run it
-again if you add an era, rather than editing six files by hand.
+It keeps the hadrons, so the AN-22-027 photon-origin classification can be
+redone **from NanoAOD** (93.4% per-photon agreement with MiniAOD; see
+`scripts_plot/README.md`). It costs disk: 12.0 kB/event instead of 4.5.
+`tools/sync_keep_rules.py` puts the rule into all six payloads; rerun it if you
+add an era.
 
 ## Do I need a particular CMSSW?
 
-**No, and there is no shared CMSSW path.** Make your own, anywhere you like.
+**No, and there is no shared CMSSW path.** The worker node builds every release
+it needs from cvmfs (2022: `CMSSW_12_4_11_patch3` + `CMSSW_13_0_13`; 2023:
+`CMSSW_13_0_14`; 2024: `CMSSW_14_0_19` + `CMSSW_14_0_21`). On the submission
+side CRAB only needs some CMSSW area for its sandbox; `ConfigDY8.py` is a stub.
 
-* **On the worker node** the job builds every release it needs itself, straight
-  from cvmfs (`scram p CMSSW ...`): 2022 uses `CMSSW_12_4_11_patch3` +
-  `CMSSW_13_0_13`, 2023 uses `CMSSW_13_0_14`, 2024 uses `CMSSW_14_0_19` +
-  `CMSSW_14_0_21`. **You do not prepare any of these.**
-* **On the submission side** CRAB only needs *some* CMSSW area to build its
-  sandbox — `ConfigDY8.py` is a stub pset that never really runs, so the
-  version is not important.
-
-⚠️ **The architecture is important.** Every production release above is
-`el8_amd64_gcc1x`, and the arch of the release you submit from decides which
-container the grid job runs in. So submit from an **el8** release inside
-`cmssw-el8`. `CMSSW_13_0_14` is a fine choice; anything el8 works.
+⚠️ **The architecture matters.** The arch you submit from decides which
+container the grid job runs in, so submit from an **el8** release inside
+`cmssw-el8`. `CMSSW_13_0_14` works.
 
 ## Setup (once per session)
 
@@ -119,10 +88,7 @@ voms-proxy-init --rfc --voms cms -valid 192:00
 cd <YOUR_COPY_OF>/DY_filter_MC_submission/Run3
 ```
 
-Replace `<YOUR_WORK_DIR>` and `<YOUR_COPY_OF>` with your own paths — nothing
-here depends on where this directory lives, only on being run from inside it.
-
-You need a grid certificate installed first:
+You need a grid certificate first:
 [WorkBookStartingGrid](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookStartingGrid).
 
 ## Submit
@@ -133,16 +99,11 @@ You need a grid certificate installed first:
 
 * `era` — `2022preEE` | `2022postEE` | `2023preBPix` | `2023postBPix` | `2024_2E` | `2024_2Mu`
 * `n_tasks` — each task is 10,000 jobs (CRAB's per-task limit)
-* `your_tag` — the production, not your name. Use `fold1` for the first fold,
-  `fold2` for the second; a task then comes out as `fold1_7`. The output already
-  lives under your own `$USER` directory, so two people cannot collide, and a
-  tag that says which round the files belong to is far more useful later than
-  one that says who submitted them.
+* `your_tag` — the production, not your name: `fold1`, `fold2`; a task comes
+  out as `fold1_7`. The output is already under your `$USER` directory
 * `first_index` — start of the numbering, default 1; use it to continue a series
 * `--dest` — output base; see below
-* `--units` — jobs per task, default 10,000 (CRAB's limit). Use a small
-  value for a first run or an acceptance test, so it goes through the real
-  submission path rather than a hand-written config
+* `--units` — jobs per task, default 10,000. Use a small value for a first run
 
 Example — 3 tasks (30,000 jobs) of 2022postEE:
 
@@ -150,49 +111,34 @@ Example — 3 tasks (30,000 jobs) of 2022postEE:
 ./submit_run3.sh 2022postEE 3 fold1
 ```
 
+**Submit one era at a time.** Sending everything at once spends your grid
+priority and slows everyone down.
+
 ### Where the output goes
 
-**Your own subdirectory of the shared project space**, derived from `$USER`:
+**Your own subdirectory of the shared project space**, derived from `$USER`,
+created on first use:
 
 ```
 /eos/project/h/htozg-dy-privatemc/<user>/HZg/root_DYfilter/phase1/<era>/<tag>/
 ```
 
-Everybody contributes to the same project, but nobody ever writes inside
-somebody else's directory. The base is created on first use if it is not there
-yet (and left alone if it is), so there is nothing to set up.
+This needs the `cernbox-project-htozg-dy-privatemc-writers` e-group — ask
+Pei-Zhu to add you. Without it the script stops immediately.
 
-This needs you to be in the `cernbox-project-htozg-dy-privatemc-writers`
-e-group — ask Pei-Zhu to add you. Without it the script stops immediately with
-a clear message rather than failing later on the grid.
-
-Use `--dest <xrootd-url>` to write somewhere else entirely, e.g. your own
-CERNBox:
+`--dest <xrootd-url>` writes somewhere else, e.g. your own CERNBox; that output
+does not count toward the fold until it is copied into the project space.
 
 ```bash
 ./submit_run3.sh --dest root://eosuser.cern.ch//eos/user/x/xxx/HZg/root_DYfilter \
                  2022postEE 3 pz
 ```
 
-The progress table below counts what is under the project space, so output
-written outside it has to be copied in before it counts.
-
-**Submit one era at a time.** Sending everything at once destroys your grid
-priority and slows everyone down.
-
 ## How many jobs
 
-The table below is for the OLD filter. For 2022postEE the new filter needs
-about **1.06x** these numbers, not 3.22x -- see "What changed in the current
-round". 3.22 is the gen-filter efficiency ratio and it does not carry through
-to the baseline.
-
-2024 has not been measured this way. Its gen-filter efficiency is much lower
-(1.45%), but whether that costs baseline statistics is exactly what the
-efficiency ratio cannot tell you -- measure it before scaling the 2024 rows.
-
 For Run 3, assuming jet photon events make up 55% of total DY after baseline,
-one fold of statistics needs:
+one fold of statistics (five jobs per baseline event) needs, with the **old**
+filter:
 
 | Era | `era` argument | Existing events after baseline | Number of jobs (10k events/job) |
 |-|-|-|-|
@@ -202,33 +148,20 @@ one fold of statistics needs:
 | 2023BPix | `2023postBPix` | 10000 | 50000 |
 | 2024 | `2024_2E`, `2024_2Mu` | 141000 | 707000 |
 
-One job ≈ one output file, and one task = 10,000 jobs, so e.g. 2022EE needs
-about 22 tasks for a full fold.
+For the new filter multiply by ~1.06 (measured on 2022postEE, above). One job is
+one output file, and a task is 10,000 jobs, so 2022EE is about 22 tasks.
 
-⚠️ **2024's 707,000 is the total, not the number for each flavor.** Every row
-of the table is the same rule -- five jobs per baseline event -- and 2024's
-141,000 is an inclusive count like the others. Splitting the production by
-lepton flavor changes who generates those events, not how many are needed: a
-`2024_2E` job makes only ee, but makes it at roughly twice the rate an
-inclusive job does, so `2024_2E` and `2024_2Mu` take about half of the 707,000
-each, or ~36 tasks apiece. Roughly, because ee and mumu do not contribute
-equally to the baseline.
+⚠️ **2024's 707,000 is the total, not the number for each flavor.** A
+`2024_2E` job makes only ee, at roughly twice the rate of an inclusive job, so
+`2024_2E` and `2024_2Mu` take about half each, ~36 tasks apiece.
 
-⚠️ **The 707,000 itself has never been checked against a real job.** The rule
-that produced it assumes 2024 yields per job what the other eras yield. 2024's
-gen-filter efficiency is lower, which pushes the number up -- by how much is
-unclear, because this file quotes both 1.45% (145 events/job, the table near
-the top) and ~2.5% (255 events/job) for the same filter. One of those is
-wrong. Measure it on a trial before sending a fold.
+⚠️ **2024 has not been measured on the baseline.** Its gen-filter efficiency is
+lower (1.45%), and whether that costs baseline statistics is what the
+efficiency ratio cannot tell you. Measure it on a trial before sending a fold.
 
-**Do not submit a whole fold at once.** Finish one era at a time; flooding the
-queue costs everyone their grid priority.
-
-Current progress is tracked in `doc/HZgamma/extended_dy_job_log.md`, counted
-from the files actually on EOS. `crab status`'s `finished` agrees with that
-count (measured: 1481 finished, 1481 files), so either is fine — but a freshly
-submitted task can report 0 finished for a while even though files are already
-appearing, because the jobs stage out themselves rather than through CRAB.
+`crab status`'s `finished` agrees with the file count on EOS, but a fresh task
+can report 0 finished while files are already appearing, because the jobs stage
+out themselves.
 
 ## Monitor
 
@@ -238,20 +171,17 @@ crab resubmit -d crab_projects/crab_DY2022postEE_fold1_1   # retry failed jobs
 crab kill     -d crab_projects/crab_DY2022postEE_fold1_1
 ```
 
-Output goes to
-`/eos/project/h/htozg-dy-privatemc/<user>/HZg/root_DYfilter/phase1/<era>/<tag>/`.
-Each task gets its own subdirectory — a single EOS directory starts failing to
-list past ~120k files, so do not flatten this.
-
-To count what you produced, use `eos ls`, not `find` or `ls`:
+Each task gets its own output subdirectory; a single EOS directory stops
+listing past ~120k files, so do not flatten this. Count with `eos ls`:
 
 ```bash
 eos root://eosproject.cern.ch ls <dir> | grep -c '\.root$'
 ```
 
 `find`/`ls` return **0 with exit code 0** on a directory that large, and
-`eos find` silently **truncates at exactly 100,000** — a count of `100000` is a
-truncation, not a result.
+`eos find` silently **truncates at exactly 100,000**.
+
+For failed jobs and stunted files, run `recover.sh` (TUTORIAL section 10).
 
 ## What is in here
 
@@ -287,32 +217,25 @@ python3 tools/make_keepmini_payload.py    # build a payload that KEEPS the MiniA
 python3 tools/check_test_batch.py         # filter efficiency, file size, GenPart content
 ```
 
-`check_test_batch.py` is the one to run first on any new era or filter change:
-it reports events/job, MB/event and the `GenPart` composition, and compares
-them against the old production. **Run a 10-job validation batch and check it
-before submitting tasks** — the efficiency decides the job count, and getting
-it wrong by 3× is the difference between one fold and a third of one.
+**Run a 10-job validation batch and check it with `check_test_batch.py` before
+submitting tasks** on any new era or filter change: it reports events/job,
+MB/event and the `GenPart` composition against the old production, and the
+efficiency decides the job count.
 
-Two things that are easy to break:
+Easy to break:
 
 * **`numCores` in the CRAB config must equal `numberOfThreads` in the PSet.**
   `ConfigDY8.py` is the 8-thread one.
 * **Premix must be given as `filelist:`, not `dbs:`.** With `dbs:` the global
-  redirector picks sites that hold no replica and the DIGI step dies with
-  `FallbackFileOpenError` (measured 33% failure). The lists here are the
-  on-disk subsets.
-* **Jobs run anywhere, and read premix over the WAN when they have to.** The
-  configs set `Data.ignoreLocality = True`, which lets a job overflow past the
-  whitelist; the whitelist stays at `T2_CH_CERN` and `T1_US_FNAL`, both because
-  CRAB refuses the config without one when `ignoreLocality` is set, and because
-  those are the two sites that hold premix. Until 2026-09-16 there was no
-  `ignoreLocality` and the whitelist meant CERN alone -- FNAL is never in the
-  site list CRAB derives for a generation task --
-  and one site is not enough for the people sharing a fold. Jobs at a site
-  with no premix replica take about twice as long, and one in ten of a ten-job
-  sample wrote 7 events instead of ~300 while still exiting 0. Run
-  `tools/check_event_counts.py` over the output before merging; nothing else
-  detects that.
+  redirector picks sites with no replica and DIGI dies with
+  `FallbackFileOpenError` (33% failure). The lists here are the on-disk subsets.
+* **Jobs run anywhere.** `Data.ignoreLocality = True` lets jobs overflow past
+  the whitelist (`T2_CH_CERN`, `T1_US_FNAL`, the two sites with premix; CRAB
+  requires one). Without it the jobs ran at CERN alone, which is not enough for
+  the people sharing a fold. Off-site jobs read premix over the WAN, take about
+  twice as long, and 0.01% to 0.70% of their files hold ~3 events instead of
+  ~300 while the job still exits 0. `recover.sh` screens every file for that;
+  see TUTORIAL section 10.
 
 Method and production notes: `doc/HZgamma/extended_dy_method.md` and
 `doc/HZgamma/extended_dy_job_log.md`. Run 2 scripts are in `../Run2` for

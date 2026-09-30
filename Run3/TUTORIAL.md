@@ -1,29 +1,22 @@
 # Submitting DY filter jobs — a walkthrough
 
-`README.md` is the reference: what the sample is, how many jobs each era needs,
-why the numbers are what they are. This file is the other thing — a linear
-walkthrough for someone submitting for the first time, from `git clone` to a
-full era, with a check after every step.
-
-The order matters. Every check here exists because skipping it has cost
-somebody a production.
+`README.md` is the reference. This file is a linear walkthrough for a first
+submission, from `git clone` to a full era, with a check after every step.
+Every check exists because skipping it has cost somebody a production.
 
 ---
 
 ## 0. Before you start
 
-You need a **grid certificate** installed in your browser and on lxplus. If you
-do not have one, or yours has expired, stop here and do
-[GRID_CERTIFICATE.md](GRID_CERTIFICATE.md) first -- it is an hour, mostly
-waiting, and once a year. Nothing below works without it, and the failure it
-gives does not mention the certificate.
+You need a **grid certificate** in your browser and on lxplus. If you have
+none, or it has expired, do [GRID_CERTIFICATE.md](GRID_CERTIFICATE.md) first
+(an hour, once a year). Nothing below works without it, and the failure does
+not mention the certificate.
 
-You also need write access to wherever the output goes. The default is your own
-subdirectory of the shared project space, so you are not writing into anybody
-else's area -- but you still have to be in the e-group that can write to that
-project at all: **`cernbox-project-htozg-dy-privatemc-writers`**. Ask to be
-added before you start; `submit_run3.sh` stops with this same name if you are
-not, but only after you have set everything else up.
+You also need to be in the e-group
+**`cernbox-project-htozg-dy-privatemc-writers`** to write the output. Ask
+before you start; `submit_run3.sh` only tells you after everything else is set
+up.
 
 ---
 
@@ -36,13 +29,10 @@ git clone https://github.com/xingchen-fan/DY_filter_MC_submission.git
 cd DY_filter_MC_submission/Run3
 ```
 
-The repository is public, so this needs no GitHub account and no SSH key. Use
-the `git@github.com:` form instead only if you already have a key on lxplus and
-intend to push back; submitting jobs never requires that.
+The repository is public; no GitHub account or SSH key is needed.
 
-Everything below is run from this `Run3` directory. Paths inside the configs
-(`psetName`, `scriptExe`, `inputFiles`) are resolved against the directory you
-run `crab submit` from, not against where the config file sits.
+Run everything below from this `Run3` directory: the paths inside the configs
+are resolved against where you run `crab submit`, not where the config sits.
 
 ---
 
@@ -78,17 +68,14 @@ command -v crab                 # must print a path
 voms-proxy-info -timeleft       # must be more than a few hours
 ```
 
-`SCRAM_ARCH` is not cosmetic: the architecture you submit **from** decides which
-container the grid job runs in. Submitting from an el9 shell gives jobs that
-cannot build the el8 releases they need, and the failure appears hours later on
-the worker node.
+`SCRAM_ARCH` decides which container the grid job runs in. Submitting from an
+el9 shell gives jobs that fail hours later on the worker node.
 
 ---
 
 ## 3. Your first submission is 10 jobs, not 10,000
 
-`submit_run3.sh` defaults to 10,000 jobs per task. For a first run, override it.
-One of these, for the era you are producing:
+`submit_run3.sh` defaults to 10,000 jobs per task. For a first run, one of:
 
 ```bash
 ./submit_run3.sh --units 10 2022preEE    1 test 1
@@ -102,15 +89,10 @@ One of these, for the era you are producing:
 The arguments, taking the 2023preBPix line apart:
 
 * `--units 10` — 10 jobs instead of 10,000
-* `2023preBPix` — the era, one of the six above. Section 8 pairs each with the
-  full-fold command
+* `2023preBPix` — the era
 * `1` — number of tasks
-* `test` — the tag. It names the production, not the person: `fold1` for the
-  first fold, `fold2` for the second. A task then comes out as `fold1_7`. The
-  output already lives under your own `$USER` directory, so two people cannot
-  collide, and a tag that says which production a file belongs to is worth far
-  more later than one that says who submitted it. A trial run is not a fold, so
-  give it `test` and leave `fold1_1` for the production that follows
+* `test` — the tag. It names the production, not the person (`fold1`, `fold2`);
+  the output is already under your `$USER` directory. Use `test` for a trial
 * `1` — first index; the task is named `<tag>_1`
 
 You should see, per task:
@@ -122,71 +104,42 @@ submitting crab_configs/crabConfig_2023preBPix_<tag>_1.py
 Task name: <date>_<time>:<user>_crab_DY2023preBPix_<tag>_1
 ```
 
-No seed is printed here, and none is chosen here — the payload derives it on
-the worker node. Section 5 says from what.
+No seed is printed: the payload derives it on the worker node (section 5).
 
 ---
 
 ## 4. Check what was actually submitted
 
-The `.sub`-equivalent for CRAB is the generated config. Read it back rather than
-trusting the script:
+Read the generated config back rather than trusting the script:
 
 ```bash
 grep -E "Submitter|totalUnits|numCores|maxMemoryMB|requestName" \
   crab_configs/crabConfig_2023preBPix_<tag>_1.py
 ```
 
-Expect your username in `Submitter`, your `totalUnits`, and the era's resources.
-
-`Submitter` is the one to look at. Without it every job of the task exits 65,
-on purpose — see section 5. `submit_run3.sh` always writes it, so on this path
-it is there; the grep is how you see it rather than assume it.
-
-(There is a `tools/check_submitter.py` that scans every config at once. It is
-for hand-written configs, which is not what you are doing here, and it cannot
-fail for a config this script generated.)
+Expect your username in `Submitter`, your `totalUnits`, and the era's
+resources. Without `Submitter` every job exits 65 (section 5).
+`tools/check_submitter.py` does the same for hand-written configs.
 
 ---
 
 ## 5. Where the seed comes from, and why it matters
 
-Each job seeds the LHE generator with a hash of four things: who submitted, the
-era directory, the tag, and the job's ProcId. Change any one of them and the
-events change.
+Each job seeds the LHE generator with a hash of the submitter, the era
+directory, the tag and the ProcId. `2024_2E` and `2024_2Mu` share the directory
+`2024`, so one person running both must use different tags or index ranges.
 
-"Era directory" rather than era, because `2024_2E` and `2024_2Mu` both pass
-`DIR=2024`. One person submitting both with the same tag and index would get
-the same seed for the two of them -- different generator fragments, so not the
-same events, but not independent draws either. Give the two flavors different
-tags or different index ranges if one person runs both.
+The ProcId alone is not enough: with `initialSeed = ProcId`, the same-numbered
+jobs of different tasks generated **the same events** -- across 13 tasks of one
+era only 29.9% were distinct. Event counts, file counts and `run:lumi:event`
+all look normal when that happens.
 
-The job index alone is not enough, and this is not hypothetical. Until
-2026-09-13 the payload used `initialSeed = ProcId`, and since every task runs
-ProcId `1..totalUnits`, **the same-numbered jobs of different tasks generated
-the same hard-process events**. Measured across 13 tasks of one era: only 29.9%
-of the accumulated events were distinct, and the 13th task added a tenth as
-many new events as the first.
-
-None of the usual checks see this. Event counts, file counts, tree entries and
-`run:lumi:event` all look normal, because what is wrong is the *independence* of
-the events, not their number.
-
-So:
-
-* You never set a seed by hand. `submit_run3.sh` passes `Submitter=$USER` and
-  the payload derives the rest.
-* Nothing is shared or coordinated. Two people at different institutions, each
-  in their own clone or fork, get different seeds because their usernames
-  differ -- no table to keep in step, no file to pull first.
-* Resubmitting a job regenerates the same seed, so a retry produces the same
-  events rather than new ones.
+* You never set a seed by hand, and nothing has to be coordinated: different
+  usernames give different seeds.
+* A retry regenerates the same seed, so it produces the same events.
 * A job with no `Submitter` **exits 65** rather than falling back to a default.
-  A silent default is how the original bug produced two weeks of output that
-  looked correct.
-* Hashing makes repeats rare rather than impossible: roughly 0.04% of jobs in a
-  full non-2024 campaign, against the 0.4% contamination the analysis already
-  carries. Section 7 measures it on the output.
+* Repeats are rare, not impossible (~0.04% of jobs); section 7 checks the
+  output.
 
 ## 6. Watch it
 
@@ -202,91 +155,47 @@ What the states mean here:
 | everything `idle` for hours | usually fair-share, not a bug. See section 9 |
 | `failed` with exit code 65 | `Submitter` did not reach the payload. Check the config, do not resubmit blindly |
 
-`crab status --long` adds a per-job table with memory, runtime and CPU
-efficiency, which is what you want when deciding resources.
+`crab status --long` adds per-job memory, runtime and CPU efficiency.
 
 ---
 
 ## 7. Check the output, not just the job states
 
-Jobs reporting success is not the same as output being correct.
-
 ```bash
 eos root://eosuser.cern.ch ls <DEST>/2023preBPix/<tag>_1 | wc -l   # one file per finished job
 ```
 
-Use `eos ls`, not `ls` or `find`. A full task writes 10,000 files into that
-directory, and the EOS FUSE mount stops listing long before that -- it returns
-nothing and no error, which reads exactly like "no output was produced".
+Use `eos ls`, not `ls` or `find`: on 10,000 files the FUSE mount returns
+nothing and no error.
 
-Once at least two tasks of the same era have output, check that they are really
-independent:
+Once two tasks of the same era have output, check that they are independent:
 
 ```bash
 python3 tools/check_seed_uniqueness.py --dir <DEST>/2023preBPix
 ```
 
-Run it inside the environment from section 2: it needs `uproot`, which the
-CMSSW release has and the system `python3` on lxplus does not.
-
-It compares `Generator_x1` — the hard-process momentum fraction — as a multiset
-between same-numbered jobs of different tasks. A shared seed shows up as roughly
-40%. Independent jobs are not exactly 0 but close to it: measured between real
-tasks of this production, 0.0% to 1.0%, which is why the threshold is 5%. It
-must end with
+Run it in the section 2 environment (it needs `uproot`). It compares
+`Generator_x1` between same-numbered jobs of different tasks: a shared seed
+shows up as ~40%, independent tasks as 0-1%, and the threshold is 5%. It must
+end with
 
 ```
 OK: no shared seeds across tasks
 ```
 
-Then check that no job succeeded while producing almost nothing:
-
-```bash
-python3 tools/check_event_counts.py --dir <DEST>/2023preBPix/<tag>_1
-```
-
-Jobs now run wherever the pool places them, including sites that hold no copy
-of the premix library and read it over the WAN. Those work -- 10 of 10 exited 0
-in the batch that was measured -- but one of the ten wrote **7 events instead
-of about 300 and still exited 0**. CRAB reports it finished, the file is there,
-the size is within a factor of two of a good one, and the tree opens. The event
-count is the only thing that is wrong, so it is the only thing that finds it.
-This must end with
-
-```
-OK: no stunted files
-```
-
-and anything it lists has to be deleted and its job id resubmitted before the
-output is merged.
-
-**Do not substitute `run:lumi:event` for this.** Every job numbers its events in
-the same `1..N` range, so 40 jobs of a *single* task already share 43.5% of
-their `run:lumi:event` triples with no shared seed involved. That is slot
-occupancy, and using it as a fingerprint gives a number that looks alarming and
-means nothing.
+Do not use `run:lumi:event` instead: every job numbers its events `1..N`, so
+40 jobs of a single task already share 43.5% of their triples.
 
 ---
 
 ## 8. Scale up — the command for every era
 
-Only after the small run has landed output and passed section 7, and one era
-at a time. Section 9 says why that last part is not a preference.
+Only after the trial has passed section 7, and one era at a time (section 9).
 
-**One fold** is the unit these numbers are in: enough jobs that the events
-surviving the analysis baseline selection match what the existing central DY
-sample already has. One fold doubles the DY statistics.
-
-The budget is **five jobs for one usable event**. A job generates 10,000 events;
-the generator filter keeps a few hundred of them, and of those, on average one
-event per five jobs is still standing after the analysis baseline selection. So
-an era's job count is five times its "existing events after baseline" column in
-`README.md`: that column is the target, and five jobs buy one event of it.
-
-That ratio is where the old progress reports came from — a fold quoted at 20%
-meant one job submitted for every event being matched.
-
-Try ten jobs first, then the era. Both commands, per era:
+**One fold** doubles the DY statistics: its events after the baseline selection
+match the existing central sample. It costs **five jobs per event after
+baseline**, so an era's job count is five times the "existing events after
+baseline" column in `README.md`.
 
 | era | trial (10 jobs) | one full fold |
 |---|---|---|
@@ -297,14 +206,12 @@ Try ten jobs first, then the era. Both commands, per era:
 | `2024_2E` | `./submit_run3.sh --units 10 2024_2E 1 test 1` | **36 tasks**, 353,500 jobs † |
 | `2024_2Mu` | `./submit_run3.sh --units 10 2024_2Mu 1 test 1` | **36 tasks**, 353,500 jobs † |
 
-Each line below is one person's whole share. Run yours, once.
+† 2024's events after baseline per job have not been measured; see README,
+"How many jobs".
 
-Nobody has to coordinate with anybody to do this safely. Your output goes under
-your own `$USER` directory, your seed is derived from your username, and no two
-people can land on the same events. The index ranges are disjoint for a
-different reason: every job names its file after the tag and index, so
-non-overlapping ranges are what keeps the filenames unique once all of this is
-merged into one place.
+Each block below is one person's share. The index ranges are disjoint because
+the filename carries only the tag and index, and the files are merged into one
+place later.
 
 ```bash
 # 2022preEE -- 7 tasks
@@ -371,125 +278,50 @@ What that adds up to:
 | `2024_2E` | 36 | 3 | 12 | ~12 |
 | `2024_2Mu` | 36 | 4 | 9 | ~9 |
 
-One person gets through roughly **10,000 jobs a day** -- measured here on
-2026-09-16/17, nine tasks of `2024_2E` returning 9,091 files in their first 24
-hours. A task is 10,000 jobs, so the number of tasks you hold and the number of
-days you wait are about the same number, and that is where the last column
-comes from.
+One person gets through about **10,000 jobs (one task) a day**, so the days
+column is your task count; the fold takes about 12 days, set by `2024_2E`.
+Treat it as the optimistic end: the rate drops as your priority is spent.
 
-What is limited is you, not the tasks. Your grid share is what decides how many
-jobs a day come back, and holding more tasks divides that same share among more
-of them rather than raising it -- which is why the days column tracks your total
-tasks and not how you group them, and why sending all eleven at once would not
-finish sooner than sending six and then five. What holding several tasks does
-buy is a queue that never runs dry, so the share is actually spent; that is the
-reason for 3 at a time rather than 1.
+Grid priority is charged per user, so holding more tasks does not return more
+jobs a day, while more people does. That is why the work is split across
+twelve people and nobody holds two eras. Junhyeok Song and Junhyuk Lee are two
+different people.
 
-The fold is finished when the last share is, so **about 12 days** -- the three
-people on `2024_2E` set that, and everybody else has slack.
-
-The number also assumes a share as fresh as ours was. Over the same hours, the
-arm of that test pinned to a single site slowed by a factor of three as its
-priority was spent. Treat the column as the optimistic end.
-
-Twelve people, 5 to 12 tasks each. **Nobody appears under two eras**, and that
-is deliberate: grid priority is charged per user, so a person split across two
-eras divides their own share between them and finishes neither sooner. It is
-also why the shares cannot be made equal -- the eras come in sizes of 5, 7, 8,
-22, 36 and 36, and a person has to fit inside one of them.
-
-Junhyeok Song and Junhyuk Lee are two people, on two different eras. Both are
-written with a surname for that reason; do not collapse them into one.
-
-Every share is written as a series of lines of at most **3 tasks**, so that no
-single submission puts more than 30,000 jobs in at once. **Send one line, and
-the next only when it has largely landed** -- and run `./recover.sh <era> fold1`
-before each new line, because roughly a tenth of the jobs fail and stay failed
-until somebody resubmits them. Section 10.
-
-Splitting the work across people is not the same as one person sending more
-tasks. Grid priority is charged per user, so twelve people each submitting
-their share draw on twelve separate shares — that is the reason to organize
-it this way rather than have one person send all 114 tasks. Within one person,
-the limit still holds: **at most 3 tasks, 30,000 jobs, per submission**, and
-one era at a time. A task only puts about 1,000 of its jobs into the global
-pool, so three already keep the queue fed, and on 2023preBPix that queue
-returned about 60 finished jobs an hour.
-
-2024 needs 72 of the 114 tasks, which is why seven of the twelve are on it.
-It is also the one number here that has never been measured -- see the footnote
-below.
+**Send one line (at most 3 tasks, 30,000 jobs) at a time**, the next only when
+it has largely landed, and run `./recover.sh <era> fold1` before each new line
+(section 10).
 
 ---
 
 ## 9. Two rules that are not optional
 
-**One era at a time, per person.** On 2026-09-06, 77 tasks (770,000 jobs) went
-in at once from a single account. The next day produced 19,226 files; the day
-after that, 1,552 — a factor of 12, with identical settings. That was one
-person's fair share being spent. Submitting more tasks does not buy more slots;
-each task only puts about 1,000 jobs into the pool anyway.
+**One era at a time, per person.** 77 tasks sent at once from one account
+returned 19,226 files on the first day and 1,552 on the second: the share was
+spent, and more tasks do not buy more slots.
 
-More people does buy slots, because priority is charged per user. The twelve
-submitters in section 8 draw on twelve separate shares, which is why six eras
-can be in flight at once there without contradicting this rule — and why one of
-those twelve running two eras at once would contradict it, dividing their own
-share between two things instead of finishing one.
-
-**Never reuse a tag for a new production.** The tag is the output subdirectory.
-Reusing one mixes two productions in one place, and after the fact there is no
-way to tell which file came from which.
+**Never reuse a tag for a new production.** Two productions in one directory
+cannot be told apart afterwards.
 
 ---
 
 ## 10. Recovery, which is routine, and the rest of what goes wrong
 
-Start here, from the `Run3` directory and inside the section 2 environment:
+From the `Run3` directory, inside the section 2 environment:
 
 ```bash
 ./recover.sh 2024_2E fold1            # report only
 ./recover.sh 2024_2E fold1 --apply    # act
 ```
 
-**Run it once a day, and always before you send your next line.** This is not
-only for when something looks wrong: about **10% of jobs fail** with the sites
-opened up, and they do not resubmit themselves once their retries run out.
-Measured over the first day of this round, on the same era and payload:
+Run it **before each new line**. It handles two failures:
 
-| | finished | failed | failure rate |
-|---|---|---|---|
-| pinned to T2_CH_CERN | 4,828 | 0 | 0.0% |
-| sites opened up | 5,792 | 620 | **9.7%** |
-
-That is the price of the throughput -- the opened-up half still produced more
-per task, and a failed job is wasted grid time rather than lost events, because
-the seed is derived and a retry regenerates exactly what was lost. But it is
-only recovered if somebody asks for it. Leave it until the end of your share
-and you finish, discover a tenth of it is missing, and start a fresh cycle for
-the remainder. Running it before each new line resubmits the last batch's
-failures while the new batch is queueing, and they cost nothing extra.
-
-It handles the two failures separately, because they need opposite treatment.
-
-**Jobs CRAB reports as failed** are retried with `crab resubmit`. The seed is
-derived from your username, the era, the tag and the ProcId, so a retry
-regenerates the same events rather than new ones: nothing is lost by retrying,
-and nothing is gained by retrying twice.
-
-**Jobs that exited 0 and wrote almost nothing** cannot be retried at all:
-
-```
-Only jobs in status failed can be resubmitted.
-```
-
-CRAB considers them finished, and it is right that they finished -- they just
-finished wrong. So `recover.sh` deletes those files and tells you how many jobs
-of output are missing. Produce that many under a **new tag**; a new tag is a new
-seed, so the replacement events differ from the ones lost, which is what you
-want. Never re-use the original tag to top up: two productions in one directory
-cannot be told apart afterwards.
-
-
+* **Jobs CRAB reports as failed**, about 10%; they stay failed once their
+  retries run out. `--apply` runs `crab resubmit`, which regenerates the same
+  events.
+* **Stunted files**: the job exited 0 but wrote ~3 events instead of ~300,
+  0.01-0.70% of a task, from sites reading premix over the WAN. CRAB cannot
+  retry them. `--apply` deletes them and prints how many jobs to produce again
+  under a **new tag** (a new seed); never top up under the original tag.
 
 | symptom | first thing to check |
 |---|---|
@@ -497,7 +329,3 @@ cannot be told apart afterwards.
 | everything `idle` for many hours | `maxMemoryMB`. 8-core jobs are capped at 20,000 MB (2.5 GB/core) and asking for the ceiling matches badly. 16,000 is measured-safe for this payload |
 | jobs vanish: not in the queue, no logs, no output | walltime. CRAB removes them, and because they never exited normally, stdout is never returned |
 | task exists on disk but nothing ever ran | `crab status` and read **"Status on the CRAB server"**. A `SUBMITFAILED` task still leaves a project directory, so any check based on directories existing will pass |
-
-That last one is worth repeating: a directory-counting reconciliation reported
-26/26 tasks submitted while one of them had failed at submission and never ran.
-Only `crab status` shows it.
