@@ -69,9 +69,10 @@ config.Data.outputDatasetTag = 'test'
 #
 # 🔴 One of those ten produced a file with 7 events instead of ~300, and still
 # exited 0. Nothing downstream notices that: the job succeeds, the file exists,
-# the size looks plausible. Only the event count shows it. Run
-# tools/check_event_counts.py over the output before merging -- see TUTORIAL
-# section 7.
+# the size looks plausible. Only the event count shows it. Over the production
+# since, 0.01% to 0.70% of the files of a task come out like that, all at sites
+# without premix. recover.sh screens every file for it -- run it before merging,
+# see TUTORIAL section 10.
 config.Data.ignoreLocality = True
 config.Site.whitelist = ['T2_CH_CERN', 'T1_US_FNAL']
 config.Site.storageSite = 'T3_CH_CERNBOX'
