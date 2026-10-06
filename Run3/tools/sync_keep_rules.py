@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Add the second gen-particle keep rule to the Run 3 CRAB payloads in job/.
+"""Add the second gen-particle keep rule to the Run 3 CRAB payloads in job/,
+or upgrade the earlier version of it.
+
+The rule keeps status-1 particles with pt > 0.5 inside |eta| < 2.6. The
+photon-origin classification only looks at the gen particle nearest to a reco
+photon with |eta| < 2.5, within dR < 0.1, so particles beyond |eta| = 2.6 never
+decide anything: the eta cut leaves the classification photon for photon
+unchanged and keeps 38% fewer GenPart. An earlier version had no eta cut;
+payloads that still carry it are upgraded in place.
 
 job/*.sh are separate copies from DY_stat_boost/CRAB_script/*.sh -- editing the
 latter does NOT reach the jobs, because crabConfig points at job/. The only two
@@ -7,7 +15,8 @@ differences are this keep rule and OUT_BASE (job/ uses ${USER}, which is the
 better version), so patch the rule in place instead of copying the file over.
 
 Input / output: DY_filter_MC_submission/Run3/job/*.sh (backed up to
-.bak_before_keepstatus1 before the first change).
+.bak_before_keepstatus1 before the rule is first added, and to
+.bak_before_eta26 before the upgrade).
 """
 import glob
 import os
@@ -20,7 +29,8 @@ JOBDIR = os.path.join(
 
 PI0 = ("select.append('keep++ (abs(pdgId) == 111 || abs(pdgId) == 221) "
        "&& pt > 5')")
-STATUS1 = "select.append('keep status == 1 && pt > 0.5')"
+STATUS1 = "select.append('keep status == 1 && pt > 0.5 && abs(eta) < 2.6')"
+OLD_STATUS1 = "select.append('keep status == 1 && pt > 0.5')"
 
 # (collection used by that cmsDriver step)
 COLLECTIONS = ["prunedGenParticles", "finalGenParticles"]
@@ -32,6 +42,14 @@ def patch(path):
 
     if STATUS1 in text:
         return "already patched"
+
+    if OLD_STATUS1 in text:
+        if text.count(OLD_STATUS1) != len(COLLECTIONS):
+            return "old rule appears %d times" % text.count(OLD_STATUS1)
+        shutil.copy2(path, path + ".bak_before_eta26")
+        with open(path, "w") as fh:
+            fh.write(text.replace(OLD_STATUS1, STATUS1))
+        return "upgraded"
 
     new = text
     for coll in COLLECTIONS:
@@ -57,7 +75,7 @@ def main():
     for f in files:
         res = patch(f)
         print("%-22s %s" % (os.path.basename(f), res))
-        if res not in ("patched", "already patched"):
+        if res not in ("patched", "upgraded", "already patched"):
             rc = 1
     # verify
     print()
@@ -66,7 +84,8 @@ def main():
             t = fh.read()
         n_pi0 = t.count(PI0)
         n_s1 = t.count(STATUS1)
-        flag = "OK" if (n_pi0 == 2 and n_s1 == 2) else "CHECK"
+        n_old = t.count(OLD_STATUS1)
+        flag = "OK" if (n_pi0 == 2 and n_s1 == 2 and n_old == 0) else "CHECK"
         print("%-22s pi0=%d status1=%d  %s" % (os.path.basename(f), n_pi0, n_s1, flag))
         if flag == "CHECK":
             rc = 1

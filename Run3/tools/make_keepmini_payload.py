@@ -72,7 +72,7 @@ def main():
         ("mini stage-out present", "STAGEOUT-MINIAOD" in text),
         ("mini directory created", "mkdir -p $DEST_PATH/mini" in text),
         ("NanoAOD stage-out intact", "STAGEOUT Successful: $DEST/$OUTFILE" in text),
-        ("new keep rules intact", text.count("keep status == 1 && pt > 0.5") == 2),
+        ("new keep rules intact", text.count("keep status == 1 && pt > 0.5 && abs(eta) < 2.6") == 2),
     ]
     ok = True
     for name, res in checks:

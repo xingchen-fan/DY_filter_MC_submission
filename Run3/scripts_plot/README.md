@@ -49,9 +49,14 @@ carry enough to reproduce it:
 ```python
 process.prunedGenParticles.select.append(
     'keep++ (abs(pdgId)==111 || abs(pdgId)==221) && pt > 5')
-process.prunedGenParticles.select.append('keep status == 1 && pt > 0.5')
+process.prunedGenParticles.select.append('keep status == 1 && pt > 0.5 && abs(eta) < 2.6')
 #   ... and the same on process.finalGenParticles for the NANOAOD step
 ```
+
+The `|η| < 2.6` cut was added after the validation below. It cannot change any
+classification: the deciding particle is the one nearest to a reco photon with
+|η| < 2.5 within ΔR < 0.1. Re-running the comparison with the cut applied gives
+the same class for every photon.
 
 Validated on the same 1,649 photons of a MiniAOD-preserving batch: **93.4%
 per-photon agreement**, `jet γ` fraction 27.0% (MiniAOD) vs 27.3% (NanoAOD).

@@ -48,15 +48,20 @@ removes 11.1% +- 4.3% of the filter sample at full baseline, at most 15.0%
 **2. A second gen-particle keep rule** in the cmsDriver steps of `job/*.sh`:
 
 ```python
-process.prunedGenParticles.select.append('keep status == 1 && pt > 0.5')
+process.prunedGenParticles.select.append('keep status == 1 && pt > 0.5 && abs(eta) < 2.6')
 #   ... and the same on process.finalGenParticles for the NANOAOD step
 ```
 
 It keeps the hadrons, so the AN-22-027 photon-origin classification can be
 redone **from NanoAOD** (93.4% per-photon agreement with MiniAOD; see
-`scripts_plot/README.md`). It costs disk: 12.0 kB/event instead of 4.5.
-`tools/sync_keep_rules.py` puts the rule into all six payloads; rerun it if you
-add an era.
+`scripts_plot/README.md`). The classification only uses the gen particle
+nearest to a reco photon with |η| < 2.5, within ΔR < 0.1, so the `|η| < 2.6`
+cut changes no classification and keeps 38% fewer GenPart. Cost: ~122 GenPart
+per event instead of 26, about ×1.45 the size of a central DY NanoAOD event
+(GenPart is ~6 bytes per particle). Measure size from branch bytes, not file
+size over events: small private files carry a fixed ~2.65 MB overhead.
+`tools/sync_keep_rules.py` puts the rule into all payloads, or upgrades the
+earlier rule without the eta cut; rerun it if you add an era.
 
 ## Do I need a particular CMSSW?
 
