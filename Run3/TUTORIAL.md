@@ -215,56 +215,28 @@ place later.
 
 ```bash
 # 2022preEE -- 7 tasks
-./submit_run3.sh 2022preEE     3  fold1 1    # fold1_1 .. fold1_3    Jookang  (1 of 3)
-./submit_run3.sh 2022preEE     2  fold1 4    # fold1_4 .. fold1_5    Jookang  (2 of 3)
-./submit_run3.sh 2022preEE     2  fold1 6    # fold1_6 .. fold1_7    Jookang  (3 of 3)
+./submit_run3.sh 2022preEE     7  fold2 1   # fold2_1 .. fold2_7     Jookang
 
 # 2022postEE -- 22 tasks
-./submit_run3.sh 2022postEE    3  fold1 1    # fold1_1 .. fold1_3    Junhyeok Song  (1 of 4)
-./submit_run3.sh 2022postEE    3  fold1 4    # fold1_4 .. fold1_6    Junhyeok Song  (2 of 4)
-./submit_run3.sh 2022postEE    3  fold1 7    # fold1_7 .. fold1_9    Junhyeok Song  (3 of 4)
-./submit_run3.sh 2022postEE    2  fold1 10   # fold1_10 .. fold1_11  Junhyeok Song  (4 of 4)
-./submit_run3.sh 2022postEE    3  fold1 12   # fold1_12 .. fold1_14  Junwon  (1 of 4)
-./submit_run3.sh 2022postEE    3  fold1 15   # fold1_15 .. fold1_17  Junwon  (2 of 4)
-./submit_run3.sh 2022postEE    3  fold1 18   # fold1_18 .. fold1_20  Junwon  (3 of 4)
-./submit_run3.sh 2022postEE    2  fold1 21   # fold1_21 .. fold1_22  Junwon  (4 of 4)
+./submit_run3.sh 2022postEE    11 fold2 1   # fold2_1 .. fold2_11    Junhyeok Song
+./submit_run3.sh 2022postEE    11 fold2 12  # fold2_12 .. fold2_22   Junwon
 
 # 2023preBPix -- 8 tasks
-./submit_run3.sh 2023preBPix   3  fold1 1    # fold1_1 .. fold1_3    Joseph  (1 of 3)
-./submit_run3.sh 2023preBPix   3  fold1 4    # fold1_4 .. fold1_6    Joseph  (2 of 3)
-./submit_run3.sh 2023preBPix   2  fold1 7    # fold1_7 .. fold1_8    Joseph  (3 of 3)
+./submit_run3.sh 2023preBPix   8  fold2 1   # fold2_1 .. fold2_8     Joseph
 
 # 2023postBPix -- 5 tasks
-./submit_run3.sh 2023postBPix  3  fold1 1    # fold1_1 .. fold1_3    Peike  (1 of 2)
-./submit_run3.sh 2023postBPix  2  fold1 4    # fold1_4 .. fold1_5    Peike  (2 of 2)
+./submit_run3.sh 2023postBPix  5  fold2 1   # fold2_1 .. fold2_5     Peike
 
 # 2024_2E -- 36 tasks
-./submit_run3.sh 2024_2E       3  fold1 1    # fold1_1 .. fold1_3    Pei-Zhu  (1 of 4)
-./submit_run3.sh 2024_2E       3  fold1 4    # fold1_4 .. fold1_6    Pei-Zhu  (2 of 4)
-./submit_run3.sh 2024_2E       3  fold1 7    # fold1_7 .. fold1_9    Pei-Zhu  (3 of 4)
-./submit_run3.sh 2024_2E       3  fold1 10   # fold1_10 .. fold1_12  Pei-Zhu  (4 of 4)
-./submit_run3.sh 2024_2E       3  fold1 13   # fold1_13 .. fold1_15  Mingxu  (1 of 4)
-./submit_run3.sh 2024_2E       3  fold1 16   # fold1_16 .. fold1_18  Mingxu  (2 of 4)
-./submit_run3.sh 2024_2E       3  fold1 19   # fold1_19 .. fold1_21  Mingxu  (3 of 4)
-./submit_run3.sh 2024_2E       3  fold1 22   # fold1_22 .. fold1_24  Mingxu  (4 of 4)
-./submit_run3.sh 2024_2E       3  fold1 25   # fold1_25 .. fold1_27  Mingtao  (1 of 4)
-./submit_run3.sh 2024_2E       3  fold1 28   # fold1_28 .. fold1_30  Mingtao  (2 of 4)
-./submit_run3.sh 2024_2E       3  fold1 31   # fold1_31 .. fold1_33  Mingtao  (3 of 4)
-./submit_run3.sh 2024_2E       3  fold1 34   # fold1_34 .. fold1_36  Mingtao  (4 of 4)
+./submit_run3.sh 2024_2E       12 fold2 1   # fold2_1 .. fold2_12    Pei-Zhu
+./submit_run3.sh 2024_2E       12 fold2 13  # fold2_13 .. fold2_24   Mingxu
+./submit_run3.sh 2024_2E       12 fold2 25  # fold2_25 .. fold2_36   Mingtao
 
 # 2024_2Mu -- 36 tasks
-./submit_run3.sh 2024_2Mu      3  fold1 1    # fold1_1 .. fold1_3    Yue Pan  (1 of 3)
-./submit_run3.sh 2024_2Mu      3  fold1 4    # fold1_4 .. fold1_6    Yue Pan  (2 of 3)
-./submit_run3.sh 2024_2Mu      3  fold1 7    # fold1_7 .. fold1_9    Yue Pan  (3 of 3)
-./submit_run3.sh 2024_2Mu      3  fold1 10   # fold1_10 .. fold1_12  Junhyuk Lee  (1 of 3)
-./submit_run3.sh 2024_2Mu      3  fold1 13   # fold1_13 .. fold1_15  Junhyuk Lee  (2 of 3)
-./submit_run3.sh 2024_2Mu      3  fold1 16   # fold1_16 .. fold1_18  Junhyuk Lee  (3 of 3)
-./submit_run3.sh 2024_2Mu      3  fold1 19   # fold1_19 .. fold1_21  Xingchen  (1 of 3)
-./submit_run3.sh 2024_2Mu      3  fold1 22   # fold1_22 .. fold1_24  Xingchen  (2 of 3)
-./submit_run3.sh 2024_2Mu      3  fold1 25   # fold1_25 .. fold1_27  Xingchen  (3 of 3)
-./submit_run3.sh 2024_2Mu      3  fold1 28   # fold1_28 .. fold1_30  Sungbeom  (1 of 3)
-./submit_run3.sh 2024_2Mu      3  fold1 31   # fold1_31 .. fold1_33  Sungbeom  (2 of 3)
-./submit_run3.sh 2024_2Mu      3  fold1 34   # fold1_34 .. fold1_36  Sungbeom  (3 of 3)
+./submit_run3.sh 2024_2Mu      9  fold2 1   # fold2_1 .. fold2_9     Yue Pan
+./submit_run3.sh 2024_2Mu      9  fold2 10  # fold2_10 .. fold2_18   Junhyuk Lee
+./submit_run3.sh 2024_2Mu      9  fold2 19  # fold2_19 .. fold2_27   Xingchen
+./submit_run3.sh 2024_2Mu      9  fold2 28  # fold2_28 .. fold2_36   Sungbeom
 ```
 
 What that adds up to:
@@ -288,7 +260,7 @@ twelve people and nobody holds two eras. Junhyeok Song and Junhyuk Lee are two
 different people.
 
 **Send one line (at most 3 tasks, 30,000 jobs) at a time**, the next only when
-it has largely landed, and run `./recover.sh <era> fold1` before each new line
+it has largely landed, and run `./recover.sh <era> fold2` before each new line
 (section 10).
 
 ---
@@ -309,8 +281,8 @@ cannot be told apart afterwards.
 From the `Run3` directory, inside the section 2 environment:
 
 ```bash
-./recover.sh 2024_2E fold1            # report only
-./recover.sh 2024_2E fold1 --apply    # act
+./recover.sh 2024_2E fold2            # report only
+./recover.sh 2024_2E fold2 --apply    # act
 ```
 
 Run it **before each new line**. It handles two failures:
