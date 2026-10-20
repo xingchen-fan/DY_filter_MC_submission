@@ -232,13 +232,10 @@ place later.
 ./submit_run3.sh 2024_2E       12 fold2 13  # fold2_13 .. fold2_24   Mingxu
 ./submit_run3.sh 2024_2E       12 fold2 25  # fold2_25 .. fold2_36   Mingtao
 
-# 2024_2Mu -- 36 tasks, 12 each (the second line of each person is fold2_19 .. fold2_27)
-./submit_run3.sh 2024_2Mu      9  fold2 1   # fold2_1 .. fold2_9     Yue Pan
-./submit_run3.sh 2024_2Mu      3  fold2 19  # fold2_19 .. fold2_21   Yue Pan
-./submit_run3.sh 2024_2Mu      9  fold2 10  # fold2_10 .. fold2_18   Junhyuk Lee
-./submit_run3.sh 2024_2Mu      3  fold2 22  # fold2_22 .. fold2_24   Junhyuk Lee
-./submit_run3.sh 2024_2Mu      9  fold2 28  # fold2_28 .. fold2_36   Sungbeom
-./submit_run3.sh 2024_2Mu      3  fold2 25  # fold2_25 .. fold2_27   Sungbeom
+# 2024_2Mu -- 36 tasks
+./submit_run3.sh 2024_2Mu      12 fold2 1   # fold2_1 .. fold2_12    Yue Pan
+./submit_run3.sh 2024_2Mu      12 fold2 13  # fold2_13 .. fold2_24   Junhyuk Lee
+./submit_run3.sh 2024_2Mu      12 fold2 25  # fold2_25 .. fold2_36   Sungbeom
 ```
 
 What that adds up to:
@@ -262,9 +259,11 @@ jobs a day, while more people does. That is why the work is split across
 eleven people and nobody holds two eras. Junhyeok Song and Junhyuk Lee are two
 different people.
 
-**Send one line (at most 3 tasks, 30,000 jobs) at a time**, the next only when
-it has largely landed, and run `./recover.sh <era> fold2` before each new line
-(section 10).
+**Send your share in one go**: your line above, at most about 120,000 jobs
+(12 tasks) from one account. That much lands within the task lifetime.
+Do not send anything more from the same account until it has landed: tasks
+stacked on top of a running share starve each other and their jobs are lost
+(section 9). Recovery is part of the plan from the start (section 10).
 
 ---
 
@@ -288,8 +287,14 @@ From the `Run3` directory, inside the section 2 environment:
 ./recover.sh 2024_2E fold2 --apply    # act
 ```
 
-Run it **before each new line**, and **at the latest 23 days after a task was
-submitted**. CRAB drops a task from its scheduler 30 days after submission and
+Run it on this schedule, counted from the day you submitted:
+
+* **Days 10-14**: the first pass, once most jobs have landed. It catches the
+  failed jobs while there is still time for them to run again.
+* **Day 23 at the latest**: the last pass. Run it even if the first pass found
+  nothing; jobs keep failing until the end.
+
+CRAB drops a task from its scheduler 30 days after submission and
 refuses `crab resubmit` once fewer than 7 days are left. After that, its failed
 jobs, and any jobs still idle or never submitted, are lost: `crab recovery`
 would start them again under the same tag and job numbers, which repeats their
