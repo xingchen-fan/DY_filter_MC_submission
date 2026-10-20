@@ -232,11 +232,13 @@ place later.
 ./submit_run3.sh 2024_2E       12 fold2 13  # fold2_13 .. fold2_24   Mingxu
 ./submit_run3.sh 2024_2E       12 fold2 25  # fold2_25 .. fold2_36   Mingtao
 
-# 2024_2Mu -- 36 tasks
+# 2024_2Mu -- 36 tasks, 12 each (the second line of each person is fold2_19 .. fold2_27)
 ./submit_run3.sh 2024_2Mu      9  fold2 1   # fold2_1 .. fold2_9     Yue Pan
+./submit_run3.sh 2024_2Mu      3  fold2 19  # fold2_19 .. fold2_21   Yue Pan
 ./submit_run3.sh 2024_2Mu      9  fold2 10  # fold2_10 .. fold2_18   Junhyuk Lee
-./submit_run3.sh 2024_2Mu      9  fold2 19  # fold2_19 .. fold2_27   Xingchen
+./submit_run3.sh 2024_2Mu      3  fold2 22  # fold2_22 .. fold2_24   Junhyuk Lee
 ./submit_run3.sh 2024_2Mu      9  fold2 28  # fold2_28 .. fold2_36   Sungbeom
+./submit_run3.sh 2024_2Mu      3  fold2 25  # fold2_25 .. fold2_27   Sungbeom
 ```
 
 What that adds up to:
@@ -248,15 +250,16 @@ What that adds up to:
 | `2023preBPix` | 8 | 1 | 8 | ~8 |
 | `2023postBPix` | 5 | 1 | 5 | ~5 |
 | `2024_2E` | 36 | 3 | 12 | ~12 |
-| `2024_2Mu` | 36 | 4 | 9 | ~9 |
+| `2024_2Mu` | 36 | 3 | 12 | ~12 |
 
 One person gets through about **10,000 jobs (one task) a day**, so the days
-column is your task count; the fold takes about 12 days, set by `2024_2E`.
+column is your task count; the fold takes about 12 days, set by `2024_2E` and
+`2024_2Mu`.
 Treat it as the optimistic end: the rate drops as your priority is spent.
 
 Grid priority is charged per user, so holding more tasks does not return more
 jobs a day, while more people does. That is why the work is split across
-twelve people and nobody holds two eras. Junhyeok Song and Junhyuk Lee are two
+eleven people and nobody holds two eras. Junhyeok Song and Junhyuk Lee are two
 different people.
 
 **Send one line (at most 3 tasks, 30,000 jobs) at a time**, the next only when
