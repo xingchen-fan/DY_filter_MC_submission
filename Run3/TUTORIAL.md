@@ -285,7 +285,15 @@ From the `Run3` directory, inside the section 2 environment:
 ./recover.sh 2024_2E fold2 --apply    # act
 ```
 
-Run it **before each new line**. It handles two failures:
+Run it **before each new line**, and **at the latest 23 days after a task was
+submitted**. CRAB drops a task from its scheduler 30 days after submission and
+refuses `crab resubmit` once fewer than 7 days are left. After that, its failed
+jobs, and any jobs still idle or never submitted, are lost: `crab recovery`
+would start them again under the same tag and job numbers, which repeats their
+seeds, so the only way back is producing them again under a new tag. 22
+`2022postEE` tasks of fold1 missed this window and lost about 84,000 jobs.
+
+It handles two failures:
 
 * **Jobs CRAB reports as failed**, about 10%; they stay failed once their
   retries run out. `--apply` runs `crab resubmit`, which regenerates the same
