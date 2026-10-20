@@ -233,10 +233,9 @@ place later.
 ./submit_run3.sh 2024_2E       12 fold2 25  # fold2_25 .. fold2_36   Mingtao
 
 # 2024_2Mu -- 36 tasks
-./submit_run3.sh 2024_2Mu      9  fold2 1   # fold2_1 .. fold2_9     Yue Pan
-./submit_run3.sh 2024_2Mu      9  fold2 10  # fold2_10 .. fold2_18   Junhyuk Lee
-./submit_run3.sh 2024_2Mu      9  fold2 19  # fold2_19 .. fold2_27   Xingchen
-./submit_run3.sh 2024_2Mu      9  fold2 28  # fold2_28 .. fold2_36   Sungbeom
+./submit_run3.sh 2024_2Mu      12 fold2 1   # fold2_1 .. fold2_12    Yue Pan
+./submit_run3.sh 2024_2Mu      12 fold2 13  # fold2_13 .. fold2_24   Junhyuk Lee
+./submit_run3.sh 2024_2Mu      12 fold2 25  # fold2_25 .. fold2_36   Sungbeom
 ```
 
 What that adds up to:
@@ -248,20 +247,23 @@ What that adds up to:
 | `2023preBPix` | 8 | 1 | 8 | ~8 |
 | `2023postBPix` | 5 | 1 | 5 | ~5 |
 | `2024_2E` | 36 | 3 | 12 | ~12 |
-| `2024_2Mu` | 36 | 4 | 9 | ~9 |
+| `2024_2Mu` | 36 | 3 | 12 | ~12 |
 
 One person gets through about **10,000 jobs (one task) a day**, so the days
-column is your task count; the fold takes about 12 days, set by `2024_2E`.
+column is your task count; the fold takes about 12 days, set by `2024_2E` and
+`2024_2Mu`.
 Treat it as the optimistic end: the rate drops as your priority is spent.
 
 Grid priority is charged per user, so holding more tasks does not return more
 jobs a day, while more people does. That is why the work is split across
-twelve people and nobody holds two eras. Junhyeok Song and Junhyuk Lee are two
+eleven people and nobody holds two eras. Junhyeok Song and Junhyuk Lee are two
 different people.
 
-**Send one line (at most 3 tasks, 30,000 jobs) at a time**, the next only when
-it has largely landed, and run `./recover.sh <era> fold2` before each new line
-(section 10).
+**Send your share in one go**: your line above, at most about 120,000 jobs
+(12 tasks) from one account. That much lands within the task lifetime.
+Do not send anything more from the same account until it has landed: tasks
+stacked on top of a running share starve each other and their jobs are lost
+(section 9). Recovery is part of the plan from the start (section 10).
 
 ---
 
@@ -285,7 +287,21 @@ From the `Run3` directory, inside the section 2 environment:
 ./recover.sh 2024_2E fold2 --apply    # act
 ```
 
-Run it **before each new line**. It handles two failures:
+Run it on this schedule, counted from the day you submitted:
+
+* **Days 10-14**: the first pass, once most jobs have landed. It catches the
+  failed jobs while there is still time for them to run again.
+* **Day 23 at the latest**: the last pass. Run it even if the first pass found
+  nothing; jobs keep failing until the end.
+
+CRAB drops a task from its scheduler 30 days after submission and
+refuses `crab resubmit` once fewer than 7 days are left. After that, its failed
+jobs, and any jobs still idle or never submitted, are lost: `crab recovery`
+would start them again under the same tag and job numbers, which repeats their
+seeds, so the only way back is producing them again under a new tag. 22
+`2022postEE` tasks of fold1 missed this window and lost about 84,000 jobs.
+
+It handles two failures:
 
 * **Jobs CRAB reports as failed**, about 10%; they stay failed once their
   retries run out. `--apply` runs `crab resubmit`, which regenerates the same
