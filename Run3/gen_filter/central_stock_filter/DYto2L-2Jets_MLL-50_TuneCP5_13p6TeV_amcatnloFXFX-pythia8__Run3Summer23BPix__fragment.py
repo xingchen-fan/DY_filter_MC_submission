@@ -1,11 +1,12 @@
 # Central production fragment, retrieved from McM
 #   https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_fragment/GEN-Run3Summer23BPixwmLHEGS-00325
-# with the DY + fake photon generator filter appended (stock CMSSW modules only).
+# with the gridpack set to the RunIII2024Summer24 one (same gridpack, per ppd-auto-bkg)
+# and the DY + fake photon generator filter appended (stock CMSSW modules only).
 
 import FWCore.ParameterSet.Config as cms
 
 externalLHEProducer = cms.EDProducer('ExternalLHEProducer',
-    args = cms.vstring('/cvmfs/cms.cern.ch/phys_generator/gridpacks/PdmV/Run3Summer22/MadGraph5_aMCatNLO/DY/DYto2L-2Jets_MLL-50_amcatnloFXFX-pythia8_slc7_amd64_gcc10_CMSSW_12_4_8_tarball.tar.xz'),
+    args = cms.vstring('/cvmfs/cms.cern.ch/phys_generator/gridpacks/PdmV/RunIII2024Summer24/MadGraph5_aMCatNLO/DY/DYto2L-2Jets_Bin-MLL-50_amcatnloFXFX-pythia8_slc7_amd64_gcc10_CMSSW_12_4_8_tarball.tar.xz'),
     nEvents = cms.untracked.uint32(5000),
     numberOfParameters = cms.uint32(1),
     outputFile = cms.string('cmsgrid_final.lhe'),
