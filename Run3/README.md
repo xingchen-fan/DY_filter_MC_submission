@@ -199,7 +199,8 @@ Tracked — this is the production:
 | `GRID_CERTIFICATE.md` | getting and installing the grid certificate everything else needs |
 | `crabConfig_<era>.py` | the six templates; `submit_run3.sh` rewrites name/tag/output |
 | `job/<era>DY.sh` | the actual job: cmsDriver chain + stage-out |
-| `gen_filter/MatchDYFilter.cc` | the GEN filter, compiled on the worker node |
+| `gen_filter/MatchDYFilter.cc` | the GEN filter of fold1 and fold2, compiled on the worker node (cluster axis moves with the photons added, so the result depends on the HepMC record order) |
+| `gen_filter/fixed_axis/MatchDYFilter.cc` | the GEN filter from fold3 on: same selection with the cluster axis fixed on the seed photon (order independent, = `MCZllMesonPhotonFilter`, cms-sw/cmssw#52268). `submit_run3.sh` picks the file from the tag |
 | `gen_filter/*fragment.py` | generator fragments, one per era |
 | `premix_lists/` | premix pileup files known to be on disk |
 | `ConfigDY8.py` | CRAB PSet stub (8 threads; must match `numCores`) |
