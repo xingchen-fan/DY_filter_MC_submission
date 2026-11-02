@@ -43,6 +43,19 @@ ERA=$1; N=$2; TAG=$3; START=${4:-1}
 CFG=crabConfig_${ERA}.py
 [ -f "$CFG" ] || { echo "no such era: $ERA (see $0 header)"; exit 1; }
 
+# Everybody submits from their own clone, and a clone that is behind submits
+# whatever its old files say -- for fold3 that would be the old moving-axis
+# filter, and the jobs would succeed without a word. So refuse to submit from a
+# clone that is behind origin/main. This only checks, it does not pull: a pull
+# would rewrite this script while bash is still reading it, and could stop
+# halfway on local changes.
+git fetch -q origin main || {
+  echo "ERROR: cannot fetch origin to check that this clone is up to date."; exit 1; }
+BEHIND=$(git rev-list --count HEAD..origin/main) || exit 1
+[ "$BEHIND" = 0 ] || {
+  echo "ERROR: this clone is $BEHIND commit(s) behind origin/main."
+  echo "       Run 'git pull' and submit again."; exit 1; }
+
 # Fail here rather than on the worker node hours later.
 [ -n "$CMSSW_BASE" ] || {
   echo "ERROR: no CMSSW environment. Make one (any el8 release) and run"
@@ -88,6 +101,23 @@ case $ERA in
   *)        DIR=$ERA; FLAV=""  ;;
 esac
 
+# --- GEN filter --------------------------------------------------------------
+# fold1 and fold2 (and their recover.sh top-ups, fold1fix / fold2fix) keep
+# gen_filter/MatchDYFilter.cc, whose cluster axis moves as photons are added,
+# so that the result depends on the HepMC record order. Every later production
+# uses gen_filter/fixed_axis/MatchDYFilter.cc, whose axis is the seed photon.
+# A fold must not mix the two, since it is normalized with one filter
+# efficiency. Both files have the same name and class: CRAB puts inputFiles in
+# the sandbox under their basename, so job/*.sh and the fragments serve both.
+# ----------------------------------------------------------------------------
+if [[ $TAG =~ ^fold[12]([^0-9]|$) ]]; then
+  FILTER=gen_filter/MatchDYFilter.cc
+else
+  FILTER=gen_filter/fixed_axis/MatchDYFilter.cc
+fi
+[ -f "$FILTER" ] || { echo "ERROR: GEN filter $FILTER not found"; exit 1; }
+echo "GEN filter for tag $TAG: $FILTER"
+
 # One generated config per task. They are throw-away -- kept only so a failed
 # submission can be inspected -- so they go in their own directory instead of
 # burying the six templates under a hundred generated files.
@@ -118,6 +148,9 @@ for i in $(seq "$START" $((START + N - 1))); do
   # payload looks it up by name, so the position does not matter.
   ARGS="$ARGS, 'Submitter=${USER}'"
   sed -i "s@\(config.JobType.scriptArgs = \).*@\1[${ARGS}]@" "$WORK"
+  sed -i "s@'gen_filter/MatchDYFilter.cc'@'${FILTER}'@" "$WORK"
+  [ "$(grep -c "'${FILTER}'" "$WORK")" = 1 ] || {
+    echo "ERROR: $WORK does not list $FILTER exactly once"; exit 1; }
   if [ -n "$UNITS" ]; then
     sed -i "s@\(config.Data.totalUnits *= *\).*@\1${UNITS}@" "$WORK"
     echo "  totalUnits -> $UNITS"
