@@ -76,7 +76,11 @@ for p in $PROJ; do
   n=${n:-0}; tot=$((tot+n))
   printf "  %-46s %5d failed\n" "$(basename "$p")" "$n"
   if [ "$n" -gt 0 ] && [ "$APPLY" -eq 1 ]; then
-    timeout --foreground 600 crab resubmit -d "$p" 2>&1 | grep -iE "Success|Error" | head -1 | sed 's/^/      /'
+    # CRAB reports success as "Resubmit request sent to the server", with no
+    # "Success" in it, so matching only Success|Error printed nothing for a
+    # resubmit that worked and it read as if nothing had happened.
+    timeout --foreground 600 crab resubmit -d "$p" 2>&1 \
+      | grep -iE "request sent|Success|Error|failed" | head -2 | sed 's/^/      /'
   fi
 done
 echo "  total $tot"
