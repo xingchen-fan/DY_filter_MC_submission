@@ -135,9 +135,21 @@ if [ "$BAD" -gt 0 ]; then
   else
     echo "  -> --apply deletes them"
   fi
+  # Suggest the next unused index rather than always 1. The seed is a hash of
+  # submitter, era directory, tag and ProcId, so a second recover pass that
+  # reuses ${TAG}fix_1 regenerates exactly the events of the first top-up.
+  # Look at both the local CRAB projects and the EOS output: the project
+  # directory may have been cleaned up, and 2024_2E and 2024_2Mu share the
+  # 2024 output directory, so an index used for one flavor is taken for both.
+  LAST=$( { ls -d crab_projects/crab_DY${ERA}_${TAG}fix_* 2>/dev/null \
+              | sed -n 's/.*fix_\([0-9]\+\)$/\1/p'
+            ls "$DEST_BASE/$DIR" 2>/dev/null \
+              | sed -n "s/^${TAG}fix_\([0-9]\+\)$/\1/p"; } | sort -n | tail -1)
+  NEXT=$(( ${LAST:-0} + 1 ))
   echo
   echo "  Those events are gone and cannot be retried. Produce the missing"
   echo "  $BAD job(s) worth under a NEW tag, for example:"
-  echo "      ./submit_run3.sh --units $BAD $ERA 1 ${TAG}fix 1"
+  echo "      ./submit_run3.sh --units $BAD $ERA 1 ${TAG}fix $NEXT"
+  [ "$NEXT" -gt 1 ] && echo "  (${TAG}fix_1 .. ${TAG}fix_${LAST} already exist, so this uses ${NEXT})"
   echo "  A new tag means a new seed, so the events differ from the ones lost."
 fi
