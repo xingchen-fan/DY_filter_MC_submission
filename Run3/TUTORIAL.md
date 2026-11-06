@@ -237,6 +237,7 @@ place later.
 ./submit_run3.sh 2024_2Mu      12 fold2 1   # fold2_1 .. fold2_12    Yue Pan
 ./submit_run3.sh 2024_2Mu      12 fold2 13  # fold2_13 .. fold2_24   Junhyuk Lee
 ./submit_run3.sh 2024_2Mu      12 fold2 25  # fold2_25 .. fold2_36   Sungbeom
+./submit_run3.sh 2024_2Mu      12 fold2 38  # fold2_38 .. fold2_49   Irene Bini
 ```
 
 What that adds up to:
@@ -250,6 +251,7 @@ What that adds up to:
 | `2023postBPix` | 5 | 1 | 5 | ~5 |
 | `2024_2E` | 36 | 3 | 12 | ~12 |
 | `2024_2Mu` | 36 | 3 | 12 | ~12 |
+| `2024_2Mu` (extra) | 12 | 1 | 12 | ~12 |
 
 One person gets through about **10,000 jobs (one task) a day**, so the days
 column is your task count; the fold takes about 12 days, set by `2024_2E` and
@@ -258,7 +260,7 @@ Treat it as the optimistic end: the rate drops as your priority is spent.
 
 Grid priority is charged per user, so holding more tasks does not return more
 jobs a day, while more people does. That is why the work is split across
-twelve people and nobody holds two eras. Junhyeok Song and Junhyuk Lee are two
+thirteen people and nobody holds two eras. Junhyeok Song and Junhyuk Lee are two
 different people.
 
 **Send your share in one go**: your line above, at most about 120,000 jobs
