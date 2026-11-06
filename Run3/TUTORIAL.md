@@ -220,6 +220,8 @@ place later.
 # 2022postEE -- 22 tasks
 ./submit_run3.sh 2022postEE    11 fold2 1   # fold2_1 .. fold2_11    Junhyeok Song
 ./submit_run3.sh 2022postEE    11 fold2 12  # fold2_12 .. fold2_22   Junwon
+# 12 more tasks on top of the 22 of one fold
+./submit_run3.sh 2022postEE    12 fold2 23  # fold2_23 .. fold2_34   Xiaohe Shen
 
 # 2023preBPix -- 8 tasks
 ./submit_run3.sh 2023preBPix   8  fold2 1   # fold2_1 .. fold2_8     Joseph
@@ -244,6 +246,7 @@ What that adds up to:
 |---|---|---|---|---|
 | `2022preEE` | 7 | 1 | 7 | ~7 |
 | `2022postEE` | 22 | 2 | 11 | ~11 |
+| `2022postEE` (extra) | 12 | 1 | 12 | ~12 |
 | `2023preBPix` | 8 | 1 | 8 | ~8 |
 | `2023postBPix` | 5 | 1 | 5 | ~5 |
 | `2024_2E` | 36 | 3 | 12 | ~12 |
@@ -256,7 +259,7 @@ Treat it as the optimistic end: the rate drops as your priority is spent.
 
 Grid priority is charged per user, so holding more tasks does not return more
 jobs a day, while more people does. That is why the work is split across
-eleven people and nobody holds two eras. Junhyeok Song and Junhyuk Lee are two
+twelve people and nobody holds two eras. Junhyeok Song and Junhyuk Lee are two
 different people.
 
 **Send your share in one go**: your line above, at most about 120,000 jobs
