@@ -1,5 +1,8 @@
 # Central-production fragments with a stock-module filter
 
+> `MatchDYFilter` is now in CMSSW as `MCZllMesonPhotonFilter`. The central request uses
+> the fragments in `../central_plugin_filter/`; the ones here are kept for reference.
+
 The fragments in the parent directory use `MatchDYFilter`, which is not part of any
 CMSSW release, so they only run where the plugin is compiled (the private production).
 The fragments here are for central (McM) production: the filter is rebuilt from modules
