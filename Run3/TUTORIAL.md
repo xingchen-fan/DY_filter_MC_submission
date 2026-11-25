@@ -241,7 +241,42 @@ place later.
 ./submit_run3.sh 2024_2Mu      12 fold2 38  # fold2_38 .. fold2_49   Irene Bini
 ```
 
-What that adds up to:
+**fold3** is the same shares with the tag `fold3`. Send yours once your fold2
+share has landed and its last `recover.sh` pass is done (section 10); you do
+not have to wait for anybody else's fold2. Pull first: from `fold3` on,
+`submit_run3.sh` uses the fixed-axis GEN filter
+(`gen_filter/fixed_axis/MatchDYFilter.cc`), picked from the tag, and it refuses
+to submit from a clone that is behind `origin/main`. Its recovery top-ups are
+`fold3fix`.
+
+```bash
+# 2022preEE -- 7 tasks
+./submit_run3.sh 2022preEE     7  fold3 1   # fold3_1 .. fold3_7     Jookang
+
+# 2022postEE -- 22 tasks
+./submit_run3.sh 2022postEE    8  fold3 1   # fold3_1 .. fold3_8     Junhyeok Song
+./submit_run3.sh 2022postEE    7  fold3 9   # fold3_9 .. fold3_15    Junwon
+./submit_run3.sh 2022postEE    7  fold3 16  # fold3_16 .. fold3_22   Xiaohe Shen
+
+# 2023preBPix -- 8 tasks
+./submit_run3.sh 2023preBPix   8  fold3 1   # fold3_1 .. fold3_8     Joseph
+
+# 2023postBPix -- 5 tasks
+./submit_run3.sh 2023postBPix  5  fold3 1   # fold3_1 .. fold3_5     Peike
+
+# 2024_2E -- 36 tasks
+./submit_run3.sh 2024_2E       12 fold3 1   # fold3_1 .. fold3_12    Pei-Zhu
+./submit_run3.sh 2024_2E       12 fold3 13  # fold3_13 .. fold3_24   Mingxu
+./submit_run3.sh 2024_2E       12 fold3 25  # fold3_25 .. fold3_36   Mingtao
+
+# 2024_2Mu -- 36 tasks
+./submit_run3.sh 2024_2Mu      12 fold3 1   # fold3_1 .. fold3_12    Yue Pan
+./submit_run3.sh 2024_2Mu      12 fold3 13  # fold3_13 .. fold3_24   Junhyuk Lee
+./submit_run3.sh 2024_2Mu      12 fold3 25  # fold3_25 .. fold3_36   Sungbeom
+```
+
+What fold2 adds up to (fold3 is the same without the 2022postEE and 2024_2Mu
+extras, and its 22 `2022postEE` tasks are shared by three people, 8 + 7 + 7):
 
 | era | tasks | people | each | days |
 |---|---|---|---|---|
