@@ -246,8 +246,11 @@ share has landed and its last `recover.sh` pass is done (section 10); you do
 not have to wait for anybody else's fold2. Pull first: from `fold3` on,
 `submit_run3.sh` uses the fixed-axis GEN filter
 (`gen_filter/fixed_axis/MatchDYFilter.cc`), picked from the tag, and it refuses
-to submit from a clone that is behind `origin/main`. Its recovery top-ups are
-`fold3fix`.
+to submit from a clone that is behind `origin/main`. A clone older than that
+check has neither: it sends `fold3` with the old filter and no error. So pull
+by hand, and make sure the submission prints
+`GEN filter for tag fold3: gen_filter/fixed_axis/MatchDYFilter.cc`.
+Its recovery top-ups are `fold3fix`.
 
 ```bash
 # 2022preEE -- 7 tasks
